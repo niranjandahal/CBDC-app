@@ -1,8 +1,6 @@
 # CBDC [Central Bank Digital Currency] Prototype Application.
 
-# Deployment Url
-
-# https://cbdc-phi.vercel.app/
+# Deployment Url : https://cbdc-phi.vercel.app/
 
 This project is a starting point for a Flutter application.
 
