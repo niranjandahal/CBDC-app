@@ -1,9 +1,9 @@
-
 import 'package:flutter/material.dart';
 
 class AppTheme {
   // Light Theme
   static ThemeData lightTheme = ThemeData(
+    brightness: Brightness.light,
     primarySwatch: Colors.blue,
     scaffoldBackgroundColor: Colors.white,
     appBarTheme: AppBarTheme(
@@ -16,12 +16,19 @@ class AppTheme {
       titleLarge: TextStyle(
           color: Colors.black, fontSize: 18, fontWeight: FontWeight.bold),
     ),
-    cardColor: Colors.white,
+    cardColor: Colors.white, // Make sure cards are white in light mode
     iconTheme: IconThemeData(color: Colors.black54),
+    elevatedButtonTheme: ElevatedButtonThemeData(
+      style: ElevatedButton.styleFrom(
+        backgroundColor: Colors.blue,
+        foregroundColor: Colors.white,
+      ),
+    ),
   );
 
   // Dark Theme
   static ThemeData darkTheme = ThemeData(
+    brightness: Brightness.dark,
     primarySwatch: Colors.deepPurple,
     scaffoldBackgroundColor: Colors.black,
     appBarTheme: AppBarTheme(
@@ -34,7 +41,13 @@ class AppTheme {
       titleLarge: TextStyle(
           color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
     ),
-    cardColor: Colors.grey[900],
+    cardColor: Colors.grey[900], // Dark mode card background
     iconTheme: IconThemeData(color: Colors.white70),
+    elevatedButtonTheme: ElevatedButtonThemeData(
+      style: ElevatedButton.styleFrom(
+        backgroundColor: Colors.deepPurple,
+        foregroundColor: Colors.white,
+      ),
+    ),
   );
 }

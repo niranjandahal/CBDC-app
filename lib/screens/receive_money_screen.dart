@@ -5,6 +5,8 @@ import 'package:flutter/services.dart';
 class ReceiveMoneyScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context); // Get current theme
+
     return Scaffold(
       appBar: AppBar(
         title: const Text("Receive Money"),
@@ -15,38 +17,51 @@ class ReceiveMoneyScreen extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             const SizedBox(height: 20),
-            const Text(
+            Text(
               "Your Wallet QR Code",
-              style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+              style: theme.textTheme.titleLarge, // Adapt text color
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 10),
-            const Text(
+            Text(
               "Share this QR code with others to receive payments.",
-              style: TextStyle(color: Colors.grey, fontSize: 16),
+              style: theme.textTheme.bodyMedium, // Adapt text color
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 20),
             Center(
-              child: // Add QrImage widget here
-                  Container(
-                height: 300,
-                width: MediaQuery.of(context).size.width * 0.8,
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Colors.white, // Ensure QR code is visible
+                  borderRadius: BorderRadius.circular(10),
+                  boxShadow: [
+                    BoxShadow(
+                      color: theme.shadowColor.withOpacity(0.3),
+                      blurRadius: 10,
+                    ),
+                  ],
+                ),
+                padding: EdgeInsets.all(20),
                 child: QrImageView(
                   data: "user_wallet_id_123456",
+                  version: QrVersions.auto,
+                  size: 250,
+                  foregroundColor: Colors.black, // Ensure QR code is visible
+                  backgroundColor: Colors.white, // Force white background
                 ),
               ),
             ),
             const SizedBox(height: 20),
-            const Text(
+            Text(
               "Wallet ID: user_wallet_id_123456",
-              style: TextStyle(fontSize: 16, color: Colors.grey),
+              style: theme.textTheme.bodyMedium, // Adapt text color
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 20),
             ElevatedButton.icon(
               onPressed: () async {
-                await Clipboard.setData(ClipboardData(text: "your text"));
+                await Clipboard.setData(
+                    ClipboardData(text: "user_wallet_id_123456"));
 
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(

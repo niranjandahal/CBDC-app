@@ -15,13 +15,18 @@ class TransactionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Card(
+      color: theme.cardColor, // Adapt card color
       margin: const EdgeInsets.only(bottom: 15),
       elevation: 3,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: ListTile(
         leading: CircleAvatar(
-          backgroundColor: isCredit ? Colors.green.withOpacity(0.1) : Colors.red.withOpacity(0.1),
+          backgroundColor: isCredit
+              ? Colors.green.withOpacity(0.1)
+              : Colors.red.withOpacity(0.1),
           child: Icon(
             isCredit ? Icons.arrow_downward : Icons.arrow_upward,
             color: isCredit ? Colors.green : Colors.red,
@@ -29,9 +34,12 @@ class TransactionCard extends StatelessWidget {
         ),
         title: Text(
           title,
-          style: const TextStyle(fontWeight: FontWeight.bold),
+          style: theme.textTheme.titleLarge, // Adapt text color
         ),
-        subtitle: Text(subtitle),
+        subtitle: Text(
+          subtitle,
+          style: theme.textTheme.bodyMedium, // Adapt text color
+        ),
         trailing: Text(
           amount,
           style: TextStyle(

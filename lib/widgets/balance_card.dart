@@ -1,16 +1,24 @@
 import 'package:flutter/material.dart';
+import "package:provider/provider.dart";
+import 'package:cbdc/themes/theme_provider.dart';
 import "package:cbdc/services/user_info.dart";
 
 class BalanceCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final themeProvider =
+        Provider.of<ThemeProvider>(context); // ✅ Move inside build
+    final isDarkMode = themeProvider.isDarkMode;
+
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(20.0),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(15),
-        gradient: const LinearGradient(
-          colors: [Colors.blue, Colors.blueAccent],
+        gradient: LinearGradient(
+          colors: isDarkMode
+              ? [Colors.grey[900]!, Colors.black] // ✅ Fixing gradient colors
+              : [Colors.blue, Colors.blueAccent],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
@@ -18,15 +26,18 @@ class BalanceCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
+          Text(
             "Current Balance",
-            style: TextStyle(color: Colors.white, fontSize: 18),
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 18,
+            ),
           ),
           const SizedBox(height: 10),
           RichText(
             text: TextSpan(
               text: "NPR ", // Smaller "NPR"
-              style: TextStyle(
+              style: const TextStyle(
                 color: Colors.white,
                 fontSize: 18, // Smaller font size for "NPR"
                 fontWeight: FontWeight.normal,
@@ -36,7 +47,7 @@ class BalanceCard extends StatelessWidget {
                 TextSpan(
                   text:
                       "${UserInfo.balance.toStringAsFixed(2)}", // Larger amount
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 36, // Larger font size for the amount
                     fontWeight: FontWeight.bold,
                   ),
@@ -47,7 +58,10 @@ class BalanceCard extends StatelessWidget {
           const SizedBox(height: 10),
           const Text(
             "Last updated: Just now",
-            style: TextStyle(color: Colors.white70, fontSize: 14),
+            style: TextStyle(
+              color: Colors.white70,
+              fontSize: 14,
+            ),
           ),
         ],
       ),
