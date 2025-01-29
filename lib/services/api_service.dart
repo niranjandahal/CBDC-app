@@ -1,11 +1,71 @@
 import 'dart:convert';
+import 'package:cbdc/screens/main_navigation.dart';
 import 'package:http/http.dart' as http;
 import 'user_info.dart';
 import 'package:cbdc/models/transaction.dart';
+import 'package:flutter/material.dart';
 
 class ApiService {
-  static const String baseUrl =
-      "http://backend.url/api"; // Replace with backend URL
+  static const String baseUrl = "https://cbdc-backend.vercel.app/api/v1";
+
+  static Future<void> registerUser(BuildContext context, String fullName,
+      String email, String password) async {
+    final response = await http.post(
+      Uri.parse("$baseUrl/user/register"),
+      headers: {"Content-Type": "application/json"},
+      body: jsonEncode({
+        "name": fullName,
+        "email": email,
+        "password": password,
+      }),
+    );
+
+    if (response.statusCode == 201) {
+      // ✅ Navigate to MainNavigation on successful registration
+      Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => MainNavigation(),
+          ));
+    } else {
+      // ❌ Show error message if registration fails
+      final responseData = jsonDecode(response.body);
+      String errorMessage = responseData["message"] ?? "Registration failed";
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(errorMessage)),
+      );
+    }
+  }
+
+  //login user
+  static Future<void> loginUser(
+      BuildContext context, String email, String password) async {
+    final response = await http.post(
+      Uri.parse("$baseUrl/user/login"),
+      headers: {"Content-Type": "application/json"},
+      body: jsonEncode({
+        "email": email,
+        "password": password,
+      }),
+    );
+
+    if (response.statusCode == 200) {
+      final responseData = jsonDecode(response.body);
+      String walletId = responseData["walletId"];
+      UserInfo.walletId = walletId;
+      Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => MainNavigation(),
+          ));
+    } else {
+      final responseData = jsonDecode(response.body);
+      String errorMessage = responseData["message"] ?? "Login failed";
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(errorMessage)),
+      );
+    }
+  }
 
   static Future<void> fetchUserInfo(String walletId) async {
     final response = await http.post(
@@ -55,9 +115,8 @@ class ApiService {
       final data = jsonDecode(response.body);
       UserInfo.transactions = data['transactions'];
     } else {
-        throw Exception("Failed to fetch transactions");
-      }
-      return [];
+      throw Exception("Failed to fetch transactions");
     }
+    return [];
   }
-
+}
