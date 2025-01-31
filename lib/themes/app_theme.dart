@@ -6,7 +6,7 @@ class AppTheme {
     brightness: Brightness.light,
     primarySwatch: Colors.blue,
     scaffoldBackgroundColor: Colors.white,
-    appBarTheme: AppBarTheme(
+    appBarTheme: const AppBarTheme(
       backgroundColor: Colors.blue,
       foregroundColor: Colors.white,
     ),
@@ -17,7 +17,7 @@ class AppTheme {
           color: Colors.black, fontSize: 18, fontWeight: FontWeight.bold),
     ),
     cardColor: Colors.white, // Make sure cards are white in light mode
-    iconTheme: IconThemeData(color: Colors.black54),
+    iconTheme: const IconThemeData(color: Colors.black54),
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
         backgroundColor: Colors.blue,
@@ -31,18 +31,18 @@ class AppTheme {
     brightness: Brightness.dark,
     primarySwatch: Colors.deepPurple,
     scaffoldBackgroundColor: Colors.black,
-    appBarTheme: AppBarTheme(
+    appBarTheme: const AppBarTheme(
       backgroundColor: Colors.black,
       foregroundColor: Colors.white,
     ),
-    textTheme: TextTheme(
+    textTheme: const TextTheme(
       bodyLarge: TextStyle(color: Colors.white, fontSize: 16),
-      bodyMedium: TextStyle(color: Colors.white70, fontSize: 14),
+      bodyMedium: const TextStyle(color: Colors.white70, fontSize: 14),
       titleLarge: TextStyle(
           color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
     ),
     cardColor: Colors.grey[900], // Dark mode card background
-    iconTheme: IconThemeData(color: Colors.white70),
+    iconTheme: const IconThemeData(color: Colors.white70),
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
         backgroundColor: Colors.deepPurple,

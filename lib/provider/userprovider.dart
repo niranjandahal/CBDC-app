@@ -9,37 +9,39 @@ import 'package:persistent_bottom_nav_bar/persistent_bottom_nav_bar.dart';
 class UserProvider with ChangeNotifier {
   static const String baseUrl = "https://cbdc-backend.vercel.app/api/v1";
 
-  String _walletId = "";
+  String _walletuserid = "";
   String _fullName = "";
-  String _userid = "";
-  String _role = "";
   String _email = "";
-  String _phone = "";
-  String _profilePic = "";
-  double _balance = 0.0;
+  double _balance = -1;
+
   List<dynamic> _transactions = [];
 
-  // ✅ Getters
+  // 👀 Getters 👀
 
-  String get walletId => _walletId;
+  String get walletuserid => _walletuserid;
   String get fullName => _fullName;
-  String get userid => _userid;
-  String get role => _role;
   String get email => _email;
-  String get phone => _phone;
-  String get profilePic => _profilePic;
   double get balance => _balance;
   List<dynamic> get transactions => _transactions;
 
-  // ✅ Check if User is Logged In
-  Future<bool> checkLoginState() async {
+  // 👀  Save Wallet ID to SharedPreferences 👀
+
+  Future<void> _savewalletuserid(String walletuserid) async {
     final prefs = await SharedPreferences.getInstance();
-    _walletId = prefs.getString("wallet_id") ?? "";
-    notifyListeners();
-    return _walletId.isNotEmpty;
+    await prefs.setString("wallet_id", walletuserid);
   }
 
-  // ✅ Register User & Save Data
+  // 👀 Check if User is Logged In 👀
+
+  Future<bool> checkLoginState() async {
+    final prefs = await SharedPreferences.getInstance();
+    _walletuserid = prefs.getString("wallet_id") ?? "";
+    notifyListeners();
+    return _walletuserid.isNotEmpty;
+  }
+
+  // 👀 Register User & update Data 👀
+
   Future<void> registerUser(
       BuildContext context, String name, String email, String password) async {
     final response = await http.post(
@@ -55,8 +57,8 @@ class UserProvider with ChangeNotifier {
     final responseData = jsonDecode(response.body);
     if (response.statusCode == 201) {
       print(responseData);
-      _updateOnLoginAndSignup(responseData["user"]);
-      // _saveWalletId(_walletId);
+      _setDataOfUseronLoginAndSignUp(responseData["user"]);
+      _savewalletuserid(_walletuserid);
       PersistentNavBarNavigator.pushNewScreen(
         context,
         screen: MainNavigation(),
@@ -71,7 +73,8 @@ class UserProvider with ChangeNotifier {
     }
   }
 
-  // ✅ Login User & Save Data
+  // 👀 Login User & update Data 👀
+
   Future<void> loginUser(
       BuildContext context, String email, String password) async {
     final response = await http.post(
@@ -85,9 +88,9 @@ class UserProvider with ChangeNotifier {
 
     if (response.statusCode == 200) {
       final responseData = jsonDecode(response.body);
-      _updateOnLoginAndSignup(responseData["user"]);
+      _setDataOfUseronLoginAndSignUp(responseData["user"]);
       print(responseData);
-      // _saveWalletId(_walletId);
+      _savewalletuserid(_walletuserid);
       PersistentNavBarNavigator.pushNewScreen(
         context,
         screen: MainNavigation(),
@@ -102,32 +105,38 @@ class UserProvider with ChangeNotifier {
     }
   }
 
-  // ✅ Fetch User Details
+  // 👀 Fetch User Details 👀
+
   Future<void> fetchUserInfo() async {
-    if (_walletId.isEmpty) return;
+    if (_walletuserid.isEmpty) return;
 
-    final response = await http.post(
-      Uri.parse("$baseUrl/user/details"),
-      headers: {"Content-Type": "application/json"},
-      body: jsonEncode({"walletId": _walletId}),
-    );
+    if (_fullName.isEmpty || _balance == -1 || _email.isEmpty) {
+      final response = await http.post(
+        Uri.parse("$baseUrl/user/details"),
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode({"walletuserid": _walletuserid}),
+      );
 
-    if (response.statusCode == 200) {
-      final data = jsonDecode(response.body);
-      _GetAllDataOfUser(data);
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        _setDataOfUseronLoginAndSignUp(data);
+      } else {
+        throw Exception("Failed to fetch user info");
+      }
     } else {
-      throw Exception("Failed to fetch user info");
+      return;
     }
   }
 
-  // ✅ Fetch Transactions
+  // 👀 Fetch Transactions 👀
+
   Future<void> fetchTransactions() async {
-    if (_walletId.isEmpty) return;
+    if (_walletuserid.isEmpty) return;
 
     final response = await http.post(
       Uri.parse("$baseUrl/transaction/history"),
       headers: {"Content-Type": "application/json"},
-      body: jsonEncode({"walletId": _walletId}),
+      body: jsonEncode({"walletuserid": _walletuserid}),
     );
 
     if (response.statusCode == 200) {
@@ -138,41 +147,101 @@ class UserProvider with ChangeNotifier {
     }
   }
 
-  // ✅ Save Wallet ID to SharedPreferences
-  Future<void> _saveWalletId(String walletId) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString("wallet_id", walletId);
-  }
-
-  // ✅ Update User Data Locally
-  void _updateOnLoginAndSignup(Map<String, dynamic> data) {
+  void _setDataOfUseronLoginAndSignUp(Map<String, dynamic> data) {
     _fullName = data['name'] ?? "";
-    _walletId = data['walletId'] ?? "";
-    _userid = data['userId'] ?? "";
+    _walletuserid = data['userId'] ?? "";
     _balance = (data['balance'] ?? 0).toDouble();
+    _email = data['email'] ?? "";
     notifyListeners();
   }
 
-  // ✅ GetAllDataOfUser
-  void _GetAllDataOfUser(Map<String, dynamic> data) {
-    _fullName = data['name'] ?? "";
-    _walletId = data['walletId'] ?? "";
-    _userid = data['userId'] ?? "";
-    _balance = (data['balance'] ?? 0).toDouble();
-    notifyListeners();
+  // 👀 Send Money 👀
+
+  Future<void> sendMoney(
+      BuildContext context, String receiverId, double amount) async {
+    if (_walletuserid.isEmpty) return;
+
+    final String apiUrl = "$baseUrl/transactions"; // Updated API endpoint
+
+    try {
+      final response = await http.post(
+        Uri.parse(apiUrl),
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer YOUR_JWT_TOKEN", // Replace with actual token
+        },
+        body: jsonEncode({
+          "receiverId": receiverId,
+          "amount": amount,
+          "transactionType": "transfer",
+          "description": "Money transfer",
+        }),
+      );
+
+      print("debuggginhg send money");
+
+      print("Response Status Code: ${response.statusCode}");
+      print("Response Body: ${response.body}");
+
+      if (response.statusCode == 201) {
+        final data = jsonDecode(response.body);
+
+        print(data);
+        // Assuming response contains updated balance
+        _balance = (data['balance'] ?? 0).toDouble();
+        notifyListeners();
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Transaction Successful")),
+        );
+
+        // Navigate back to home or transaction history screen
+        Navigator.pop(context);
+      } else {
+        final errorMessage =
+            jsonDecode(response.body)['message'] ?? "Transaction failed";
+        print(errorMessage);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(errorMessage)),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Error: $e")),
+      );
+    }
   }
 
-  // ✅ Logout User
+  //👀 get balance 👀
+
+  Future<void> getBalance() async {
+    if (_walletuserid.isEmpty) return;
+
+    final response = await http.post(
+      Uri.parse("$baseUrl/user/balance"),
+      headers: {"Content-Type": "application/json"},
+      body: jsonEncode({"walletuserid": _walletuserid}),
+    );
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      _balance = (data['balance'] ?? 0).toDouble();
+      notifyListeners();
+    } else {
+      throw Exception("Failed to fetch user info");
+    }
+  }
+
+  // 👀 Logout User 👀
+
   Future<void> logout(BuildContext context) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove("wallet_id");
 
-    _walletId = "";
+    _walletuserid = "";
     _fullName = "";
     _email = "";
-    _phone = "";
-    _profilePic = "";
-    _balance = 0.0;
+    _balance = -1;
     _transactions = [];
 
     notifyListeners();

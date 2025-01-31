@@ -92,8 +92,8 @@ class _SignupScreenState extends State<SignupScreen> {
                   ? [
                       Colors.black,
                       Colors.grey[900]!,
-                    ] // ✅ Apply dark gradient
-                  : [Colors.white, Colors.white], // ✅ Keep white for light mode
+                    ] // 👀 Apply dark gradient
+                  : [Colors.white, Colors.white], // 👀 Keep white for light mode
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),

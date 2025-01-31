@@ -7,7 +7,7 @@ class BalanceCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final themeProvider =
-        Provider.of<ThemeProvider>(context); // ✅ Move inside build
+        Provider.of<ThemeProvider>(context); // 👀 Move inside build
     final isDarkMode = themeProvider.isDarkMode;
 
     return Consumer<UserProvider>(
@@ -22,7 +22,7 @@ class BalanceCard extends StatelessWidget {
                   ? [
                       Colors.grey[900]!,
                       Colors.black
-                    ] // ✅ Fixing gradient colors
+                    ] // 👀 Fixing gradient colors
                   : [Colors.blue, Colors.blueAccent],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,

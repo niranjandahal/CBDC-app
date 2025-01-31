@@ -12,15 +12,15 @@ class SettingsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("Settings")),
+      appBar: AppBar(title: const Text("Settings")),
       body: ListView(
         padding: const EdgeInsets.all(20.0),
         children: [
-          Divider(),
+          const Divider(),
           ListTile(
-            leading: Icon(Icons.logout),
-            title: Text("Logout"),
-            onTap: () => _logout(context), // ✅ Calls logout function
+            leading: const Icon(Icons.logout),
+            title: const Text("Logout"),
+            onTap: () => _logout(context), // 👀 Calls logout function
           ),
         ],
       ),

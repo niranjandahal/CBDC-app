@@ -49,14 +49,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.0.8"
-  equatable:
-    dependency: transitive
-    description:
-      name: equatable
-      sha256: "567c64b3cb4cf82397aac55f4f0cbd3ca20d77c6c03bedbc4ceaddc08904aef7"
-      url: "https://pub.dev"
-    source: hosted
-    version: "2.0.7"
   fake_async:
     dependency: transitive
     description:
@@ -81,14 +73,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "7.0.1"
-  fl_chart:
-    dependency: "direct dev"
-    description:
-      name: fl_chart
-      sha256: "74959b99b92b9eebeed1a4049426fd67c4abc3c5a0f4d12e2877097d6a11ae08"
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.69.2"
   flutter:
     dependency: "direct main"
     description: flutter
@@ -121,7 +105,7 @@ packages:
     source: sdk
     version: "0.0.0"
   http:
-    dependency: "direct dev"
+    dependency: "direct main"
     description:
       name: http
       sha256: fe7ab022b76f3034adc518fb6ea04a82387620e19977665ea18d30a1cf43442f
@@ -177,7 +161,7 @@ packages:
     source: hosted
     version: "4.0.0"
   local_auth:
-    dependency: "direct dev"
+    dependency: "direct main"
     description:
       name: local_auth
       sha256: "434d854cf478f17f12ab29a76a02b3067f86a63a6d6c4eb8fbfdcfe4879c1b7b"
@@ -281,7 +265,7 @@ packages:
     source: hosted
     version: "2.3.0"
   persistent_bottom_nav_bar:
-    dependency: "direct dev"
+    dependency: "direct main"
     description:
       name: persistent_bottom_nav_bar
       sha256: "6aa9b97ced1abd92c90cedd1997d34ea0b35c3ded762ac6063baccc299b0c4c5"
@@ -305,7 +289,7 @@ packages:
     source: hosted
     version: "2.1.8"
   provider:
-    dependency: "direct dev"
+    dependency: "direct main"
     description:
       name: provider
       sha256: c8a055ee5ce3fd98d6fc872478b03823ffdb448699c6ebdbbc71d59b596fd48c
@@ -321,7 +305,7 @@ packages:
     source: hosted
     version: "3.0.2"
   qr_code_scanner_plus:
-    dependency: "direct dev"
+    dependency: "direct main"
     description:
       name: qr_code_scanner_plus
       sha256: "5cce6588571dccb4eba755e39d288497b3c70e8a420bfdf72dbd4c5fe9c19236"
@@ -329,7 +313,7 @@ packages:
     source: hosted
     version: "2.0.8+1"
   qr_flutter:
-    dependency: "direct dev"
+    dependency: "direct main"
     description:
       name: qr_flutter
       sha256: "5095f0fc6e3f71d08adef8feccc8cea4f12eec18a2e31c2e8d82cb6019f4b097"
@@ -337,7 +321,7 @@ packages:
     source: hosted
     version: "4.1.0"
   shared_preferences:
-    dependency: "direct dev"
+    dependency: "direct main"
     description:
       name: shared_preferences
       sha256: a752ce92ea7540fc35a0d19722816e04d0e72828a4200e83a98cf1a1eb524c9a

@@ -36,8 +36,8 @@ class _LoginScreenState extends State<LoginScreen> {
                   ? [
                       Colors.black,
                       Colors.grey[900]!,
-                    ] // ✅ Apply dark gradient
-                  : [Colors.white, Colors.white], // ✅ Keep white for light mode
+                    ] // 👀 Apply dark gradient
+                  : [Colors.white, Colors.white], // 👀 Keep white for light mode
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
@@ -48,7 +48,7 @@ class _LoginScreenState extends State<LoginScreen> {
               Container(
                 alignment: Alignment.center,
                 // margin: EdgeInsets.symmetric(horizontal: 20),
-                child: Text(
+                child: const Text(
                   'CBDC',
                   style: TextStyle(
                     color: Colors.white,
@@ -60,7 +60,7 @@ class _LoginScreenState extends State<LoginScreen> {
               Expanded(
                 child: Container(
                   decoration: BoxDecoration(
-                    borderRadius: BorderRadius.only(
+                    borderRadius: const BorderRadius.only(
                       topLeft: Radius.circular(30),
                       topRight: Radius.circular(30),
                     ),
@@ -69,11 +69,11 @@ class _LoginScreenState extends State<LoginScreen> {
                           ? [
                               Colors.black,
                               Colors.grey[900]!,
-                            ] // ✅ Apply dark gradient
+                            ] // 👀 Apply dark gradient
                           : [
                               Colors.white,
                               Colors.white
-                            ], // ✅ Keep white for light mode
+                            ], // 👀 Keep white for light mode
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
                     ),
@@ -86,58 +86,58 @@ class _LoginScreenState extends State<LoginScreen> {
                   //   ),
                   // ),
                   child: Padding(
-                    padding: EdgeInsets.all(20),
+                    padding: const EdgeInsets.all(20),
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        Text(
+                        const Text(
                           'Sign In',
                           style: TextStyle(
                             fontSize: 32,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
-                        SizedBox(height: 30),
+                        const SizedBox(height: 30),
                         TextField(
                           controller: emailController,
                           decoration: InputDecoration(
                             hintText: 'Email',
-                            prefixIcon: Icon(Icons.email),
+                            prefixIcon: const Icon(Icons.email),
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(10),
                             ),
                           ),
                         ),
-                        SizedBox(height: 20),
+                        const SizedBox(height: 20),
                         TextField(
                           controller: passwordController,
                           obscureText: true,
                           decoration: InputDecoration(
                             hintText: 'Password',
-                            prefixIcon: Icon(Icons.lock),
+                            prefixIcon: const Icon(Icons.lock),
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(10),
                             ),
                           ),
                         ),
-                        SizedBox(height: 20),
+                        const SizedBox(height: 20),
                         Padding(
                           padding: const EdgeInsets.all(8.0),
                           child: ElevatedButton(
                             onPressed: () async {
                               _loginuser();
                             },
-                            child: Text('Sign In'),
+                            child: const Text('Sign In'),
                             style: ElevatedButton.styleFrom(
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(10),
                               ),
-                              padding: EdgeInsets.symmetric(vertical: 15),
+                              padding: const EdgeInsets.symmetric(vertical: 15),
                             ),
                           ),
                         ),
-                        SizedBox(height: 20),
+                        const SizedBox(height: 20),
                         Padding(
                           padding: const EdgeInsets.all(8.0),
                           child: ElevatedButton(
@@ -150,12 +150,12 @@ class _LoginScreenState extends State<LoginScreen> {
                                     PageTransitionAnimation.cupertino,
                               );
                             },
-                            child: Text('Sign Up'),
+                            child: const Text('Sign Up'),
                             style: ElevatedButton.styleFrom(
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(10),
                               ),
-                              padding: EdgeInsets.symmetric(vertical: 15),
+                              padding: const EdgeInsets.symmetric(vertical: 15),
                             ),
                           ),
                         ),
@@ -163,7 +163,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           onPressed: () {
                             // Handle forgot password button tap
                           },
-                          child: Text(
+                          child: const Text(
                             'Forgot Password?',
                             style: TextStyle(
                               color: Colors.blue,

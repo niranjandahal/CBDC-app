@@ -36,7 +36,7 @@ class DashboardScreen extends StatelessWidget {
             children: [
               // Use reusable BalanceCard
               BalanceCard(),
-              SizedBox(height: 30),
+              const SizedBox(height: 30),
               // Action Buttons
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -83,19 +83,19 @@ class DashboardScreen extends StatelessWidget {
                   ),
                 ],
               ),
-              SizedBox(height: 30),
+              const SizedBox(height: 30),
               // Recent Transactions
-              Text(
+              const Text(
                 "Recent Transactions",
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              SizedBox(height: 10),
+              const SizedBox(height: 10),
               ListView.builder(
                 shrinkWrap: true,
-                physics: NeverScrollableScrollPhysics(),
+                physics: const NeverScrollableScrollPhysics(),
                 itemCount: 5, // Hardcoded for now
                 itemBuilder: (context, index) {
                   return TransactionCard(
@@ -124,10 +124,10 @@ class DashboardScreen extends StatelessWidget {
             backgroundColor: color.withOpacity(0.1),
             child: Icon(icon, color: color, size: 28),
           ),
-          SizedBox(height: 8),
+          const SizedBox(height: 8),
           Text(
             title,
-            style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
           ),
         ],
       ),

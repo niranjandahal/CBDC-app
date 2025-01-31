@@ -33,7 +33,7 @@ class CBDCApp extends StatelessWidget {
             theme: themeProvider.isDarkMode
                 ? AppTheme.darkTheme
                 : AppTheme.lightTheme,
-            home: AuthHandler(),
+            home: const AuthHandler(),
           );
         },
       ),
