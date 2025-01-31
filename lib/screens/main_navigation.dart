@@ -20,6 +20,19 @@ class _MainNavigationState extends State<MainNavigation> {
       PersistentTabController(initialIndex: 0);
 
   @override
+  void initState() {
+    super.initState();
+
+    // Ensure that user info is fetched when walletuserid is not empty
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+
+    // Fetch user info if walletuserid is available
+    if (userProvider.walletuserid.isNotEmpty) {
+      userProvider.fetchUserInfo();
+    }
+  }
+
+  @override
   void dispose() {
     _controller.dispose(); // 👀 Fixes issue of multiple navbars persisting
     super.dispose();

@@ -37,7 +37,10 @@ class _LoginScreenState extends State<LoginScreen> {
                       Colors.black,
                       Colors.grey[900]!,
                     ] // 👀 Apply dark gradient
-                  : [Colors.white, Colors.white], // 👀 Keep white for light mode
+                  : [
+                      Colors.white,
+                      Colors.white
+                    ], // 👀 Keep white for light mode
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
@@ -51,7 +54,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 child: const Text(
                   'CBDC',
                   style: TextStyle(
-                    color: Colors.white,
+                    // color: isDarkMode ? Colors.white : Colors.black,
                     fontSize: 30,
                     fontWeight: FontWeight.bold,
                   ),
