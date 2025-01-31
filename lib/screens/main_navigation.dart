@@ -6,7 +6,7 @@ import 'transaction_history_screen.dart';
 import 'settings_screen.dart';
 import 'qrscan_page.dart';
 import 'package:provider/provider.dart';
-import 'package:cbdc/themes/theme_provider.dart';
+import 'package:cbdc/provider/theme_provider.dart';
 
 class MainNavigation extends StatefulWidget {
   @override
@@ -16,6 +16,12 @@ class MainNavigation extends StatefulWidget {
 class _MainNavigationState extends State<MainNavigation> {
   final PersistentTabController _controller =
       PersistentTabController(initialIndex: 0);
+
+  @override
+  void dispose() {
+    _controller.dispose(); // ✅ Fixes issue of multiple navbars persisting
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -35,15 +41,16 @@ class _MainNavigationState extends State<MainNavigation> {
         ),
       ),
       child: PersistentTabView(
+        animationSettings: NavBarAnimationSettings(),
         navBarHeight: 60,
         context,
         controller: _controller,
         screens: _buildScreens(),
         items: _navBarsItems(isDarkMode),
         backgroundColor: Colors.transparent, // ✅ Makes the gradient visible
-        handleAndroidBackButtonPress: true,
+        handleAndroidBackButtonPress: false,
         resizeToAvoidBottomInset: true,
-        stateManagement: true,
+        stateManagement: false, // ✅ Prevents nav state from persisting
         decoration: NavBarDecoration(
           borderRadius: BorderRadius.circular(10.0),
           colorBehindNavBar:
@@ -53,28 +60,6 @@ class _MainNavigationState extends State<MainNavigation> {
       ),
     );
   }
-
-  //   return PersistentTabView(
-  //     navBarHeight: 60,
-
-  //     context,
-  //     controller: _controller,
-  //     screens: _buildScreens(),
-  //     items: _navBarsItems(isDarkMode),
-  //     backgroundColor:
-  //         isDarkMode ? Colors.black : Colors.white, // Dynamic background color
-  //     handleAndroidBackButtonPress: true,
-  //     resizeToAvoidBottomInset: true,
-  //     stateManagement: true,
-  //     decoration: NavBarDecoration(
-  //       borderRadius: BorderRadius.circular(10.0),
-  //       colorBehindNavBar:
-  //           isDarkMode ? Colors.black : Colors.white, // Dynamic color
-  //     ),
-  //     navBarStyle: NavBarStyle.style15,
-  //   );
-  // }
-
   List<Widget> _buildScreens() {
     return [
       DashboardScreen(),

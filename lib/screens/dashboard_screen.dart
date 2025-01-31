@@ -1,11 +1,12 @@
-import 'package:cbdc/themes/theme_provider.dart';
+import 'package:cbdc/provider/theme_provider.dart';
 import 'package:cbdc/widgets/transaction_card.dart';
 import 'package:flutter/material.dart';
-import '../widgets/balance_card.dart'; // Import the reusable widget
+import '../widgets/balance_card.dart'; 
 import 'send_money_screen.dart';
 import 'receive_money_screen.dart';
 import 'profile_screen.dart';
 import 'package:provider/provider.dart';
+import 'package:persistent_bottom_nav_bar/persistent_bottom_nav_bar.dart';
 
 class DashboardScreen extends StatelessWidget {
   @override
@@ -25,16 +26,6 @@ class DashboardScreen extends StatelessWidget {
               themeProvider.toggleTheme();
             },
           ),
-          // Notifications Icon
-          // IconButton(
-          //   icon: const Icon(Icons.notifications),
-          //   onPressed: () {
-          //     Navigator.push(
-          //       context,
-          //       MaterialPageRoute(builder: (context) => NotificationsScreen()),
-          //     );
-          //   },
-          // ),
         ],
       ),
       body: SingleChildScrollView(
@@ -55,23 +46,26 @@ class DashboardScreen extends StatelessWidget {
                     "Send Money",
                     Icons.send,
                     Colors.blue,
-                    () => Navigator.push(
+                    () => PersistentNavBarNavigator.pushNewScreen(
                       context,
-                      MaterialPageRoute(
-                        builder: (context) => SendMoneyScreen(),
-                      ),
+                      screen: SendMoneyScreen(),
+                      withNavBar: false,
+                      pageTransitionAnimation:
+                          PageTransitionAnimation.cupertino,
                     ),
+                   
                   ),
                   _actionButton(
                     context,
                     "Receive Money",
                     Icons.qr_code_scanner,
                     Colors.green,
-                    () => Navigator.push(
+                    () => PersistentNavBarNavigator.pushNewScreen(
                       context,
-                      MaterialPageRoute(
-                        builder: (context) => ReceiveMoneyScreen(),
-                      ),
+                      screen: ReceiveMoneyScreen(),
+                      withNavBar: false,
+                      pageTransitionAnimation:
+                          PageTransitionAnimation.cupertino,
                     ),
                   ),
                   _actionButton(
@@ -79,11 +73,12 @@ class DashboardScreen extends StatelessWidget {
                     "Profile",
                     Icons.person,
                     Colors.purple,
-                    () => Navigator.push(
+                    () => PersistentNavBarNavigator.pushNewScreen(
                       context,
-                      MaterialPageRoute(
-                        builder: (context) => ProfileScreen(),
-                      ),
+                      screen: ProfileScreen(),
+                      withNavBar: false,
+                      pageTransitionAnimation:
+                          PageTransitionAnimation.cupertino,
                     ),
                   ),
                 ],

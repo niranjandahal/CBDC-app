@@ -1,6 +1,6 @@
+import 'package:cbdc/provider/userprovider.dart';
 import 'package:flutter/material.dart';
-import 'package:cbdc/services/api_service.dart';
-import 'package:cbdc/services/user_info.dart';
+import 'package:provider/provider.dart';
 
 class SendMoneyScreen extends StatelessWidget {
   final TextEditingController receiverController = TextEditingController();
@@ -8,6 +8,7 @@ class SendMoneyScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final userprovider = Provider.of<UserProvider>(context, listen: false);
     return Scaffold(
       appBar: AppBar(
         title: Text("Send Money"),
@@ -32,10 +33,10 @@ class SendMoneyScreen extends StatelessWidget {
                 final receiverId = receiverController.text;
                 final amount = double.tryParse(amountController.text) ?? 0;
 
-                await ApiService.sendMoney(
-                    UserInfo.walletId, receiverId, amount);
-                await ApiService.fetchUserInfo(
-                    UserInfo.walletId); // Update balance
+                // await userprovider.(
+                //     UserInfo.walletId, receiverId, amount);
+                // await userprovider.fetchUserInfo(
+                //     UserInfo.walletId); // Update balance
 
                 Navigator.pop(context); // Return to previous screen
               },

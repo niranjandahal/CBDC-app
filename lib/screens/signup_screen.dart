@@ -1,8 +1,9 @@
-import 'package:cbdc/main.dart';
+import 'package:cbdc/provider/userprovider.dart';
 import 'package:cbdc/screens/login_screen.dart';
-import 'package:cbdc/screens/main_navigation.dart';
 import 'package:flutter/material.dart';
-import 'package:cbdc/services/api_service.dart'; // Import AuthService
+import 'package:provider/provider.dart';
+import 'package:cbdc/provider/theme_provider.dart';
+import 'package:persistent_bottom_nav_bar/persistent_bottom_nav_bar.dart';
 
 class SignupScreen extends StatefulWidget {
   @override
@@ -17,17 +18,14 @@ class _SignupScreenState extends State<SignupScreen> {
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
 
-  String? _username;
-  String? _email;
-  String? _password;
-  String? _confirmPassword;
-
   void _submitForm() async {
     if (_formKey.currentState!.validate()) {
       try {
-        await ApiService.registerUser(
+        final userprovider = Provider.of<UserProvider>(context, listen: false);
+        await userprovider.registerUser(
             context, name.text, email.text, _passwordController.text);
       } catch (e) {
+        print(e);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text("Registration failed: $e")),
         );
@@ -81,10 +79,25 @@ class _SignupScreenState extends State<SignupScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final themeProvider = Provider.of<ThemeProvider>(context);
+    final isDarkMode = themeProvider.isDarkMode;
     return Scaffold(
-      backgroundColor: Colors.white,
+      // backgroundColor: isDarkMode ? Colors.black : Colors.white,
       body: SingleChildScrollView(
         child: Container(
+          height: MediaQuery.of(context).size.height,
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: isDarkMode
+                  ? [
+                      Colors.black,
+                      Colors.grey[900]!,
+                    ] // ✅ Apply dark gradient
+                  : [Colors.white, Colors.white], // ✅ Keep white for light mode
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+          ),
           padding: EdgeInsets.symmetric(horizontal: 24),
           child: Form(
             key: _formKey,
@@ -107,9 +120,7 @@ class _SignupScreenState extends State<SignupScreen> {
                     prefixIcon: Icon(Icons.person),
                   ),
                   validator: _validateUsername,
-                  onChanged: (value) {
-                    _username = value;
-                  },
+                  onChanged: (value) {},
                 ),
                 SizedBox(height: 20),
                 TextFormField(
@@ -119,9 +130,7 @@ class _SignupScreenState extends State<SignupScreen> {
                     prefixIcon: Icon(Icons.email),
                   ),
                   validator: _validateEmail,
-                  onChanged: (value) {
-                    _email = value;
-                  },
+                  onChanged: (value) {},
                 ),
                 SizedBox(height: 20),
                 TextFormField(
@@ -132,9 +141,7 @@ class _SignupScreenState extends State<SignupScreen> {
                   obscureText: true,
                   controller: _passwordController,
                   validator: _validatePassword,
-                  onChanged: (value) {
-                    _password = value;
-                  },
+                  onChanged: (value) {},
                 ),
                 SizedBox(height: 20),
                 TextFormField(
@@ -145,9 +152,7 @@ class _SignupScreenState extends State<SignupScreen> {
                   obscureText: true,
                   controller: _confirmPasswordController,
                   validator: _validateConfirmPassword,
-                  onChanged: (value) {
-                    _confirmPassword = value;
-                  },
+                  onChanged: (value) {},
                 ),
                 SizedBox(height: 20),
                 ElevatedButton(
@@ -169,8 +174,13 @@ class _SignupScreenState extends State<SignupScreen> {
                     padding: EdgeInsets.symmetric(vertical: 15),
                   ),
                   onPressed: () {
-                    Navigator.push(context,
-                        MaterialPageRoute(builder: (context) => LoginScreen()));
+                    PersistentNavBarNavigator.pushNewScreen(
+                      context,
+                      screen: LoginScreen(),
+                      withNavBar: false,
+                      pageTransitionAnimation:
+                          PageTransitionAnimation.cupertino,
+                    );
                   },
                   child: Text('Log In'),
                 ),

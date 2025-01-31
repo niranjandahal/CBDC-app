@@ -1,43 +1,26 @@
-import 'package:cbdc/screens/login_screen.dart';
+import 'package:cbdc/provider/userprovider.dart';
 import 'package:flutter/material.dart';
-// import 'package:cbdc/services/shared_prefs_helper.dart';
+import 'package:provider/provider.dart';
 
-class SettingsScreen extends StatefulWidget {
-  @override
-  _SettingsScreenState createState() => _SettingsScreenState();
-}
+class SettingsScreen extends StatelessWidget {
+  void _logout(context) {
+    final userprovider = Provider.of<UserProvider>(context, listen: false);
 
-class _SettingsScreenState extends State<SettingsScreen> {
-  bool isBiometricEnabled = false;
-
-  @override
-  void initState() {
-    super.initState();
+    userprovider.logout(context);
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text("Settings"),
-      ),
+      appBar: AppBar(title: Text("Settings")),
       body: ListView(
         padding: const EdgeInsets.all(20.0),
         children: [
           Divider(),
-          GestureDetector(
-            onTap: () {
-              Navigator.pushAndRemoveUntil(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => LoginScreen(),
-                  ),
-                  (route) => false);
-            },
-            child: ListTile(
-              leading: Icon(Icons.logout),
-              title: Text("Logout"),
-            ),
+          ListTile(
+            leading: Icon(Icons.logout),
+            title: Text("Logout"),
+            onTap: () => _logout(context), // ✅ Calls logout function
           ),
         ],
       ),
