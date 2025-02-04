@@ -331,7 +331,7 @@ class UserProvider with ChangeNotifier {
 
       if (response.statusCode == 201) {
         final data = jsonDecode(response.body);
-        _balance = (data['balance'] ?? 0).toDouble();
+        _balance = (data['balance'] ?? -1).toDouble();
         notifyListeners();
 
         // Navigate first, then show success message
