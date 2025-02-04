@@ -1,6 +1,8 @@
 import 'package:cbdc/provider/userprovider.dart';
+import 'package:cbdc/screens/auth/login_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:persistent_bottom_nav_bar/persistent_bottom_nav_bar.dart';
 
 class ProfileScreen extends StatelessWidget {
   @override
@@ -9,8 +11,18 @@ class ProfileScreen extends StatelessWidget {
       appBar: AppBar(
         title: const Text("Profile"),
       ),
-      body: Consumer<UserProvider>(
-        builder: (context, value, child) => Padding(
+      body: Consumer<UserProvider>(builder: (context, value, child) {
+        if (value.email.isEmpty || value.fullName.isEmpty) {
+          Future.microtask(() => PersistentNavBarNavigator.pushNewScreen(
+                context,
+                screen: LoginScreen(),
+                withNavBar: false,
+                pageTransitionAnimation: PageTransitionAnimation.cupertino,
+              ));
+          return SizedBox();
+        }
+
+        return Padding(
           padding: const EdgeInsets.all(20.0),
           child: Column(
             children: [
@@ -57,8 +69,8 @@ class ProfileScreen extends StatelessWidget {
               ),
             ],
           ),
-        ),
-      ),
+        );
+      }),
     );
   }
 

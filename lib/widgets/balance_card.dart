@@ -3,7 +3,29 @@ import 'package:flutter/material.dart';
 import "package:provider/provider.dart";
 import 'package:cbdc/provider/theme_provider.dart';
 
-class BalanceCard extends StatelessWidget {
+class BalanceCard extends StatefulWidget {
+  @override
+  _BalanceCardState createState() => _BalanceCardState();
+}
+
+class _BalanceCardState extends State<BalanceCard> {
+  // @override
+  // void initState() {
+  //   super.initState();
+  //   // Provider.of<UserProvider>(context, listen: false).getBalance();
+  //   // Start the periodic balance update when the widget is created
+  //   Provider.of<UserProvider>(context, listen: false)
+  //       .startPeriodicBalanceUpdate();
+  // }
+
+  // @override
+  // void dispose() {
+  //   // Stop the periodic balance update when the widget is disposed
+  //   Provider.of<UserProvider>(context, listen: false)
+  //       .stopPeriodicBalanceUpdate();
+  //   super.dispose();
+  // }
+
   @override
   Widget build(BuildContext context) {
     final themeProvider =

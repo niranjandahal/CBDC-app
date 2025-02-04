@@ -1,4 +1,5 @@
 import 'package:cbdc/provider/userprovider.dart';
+import 'package:cbdc/screens/auth/login_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:flutter/services.dart';
@@ -15,7 +16,7 @@ class ReceiveMoneyScreen extends StatelessWidget {
       ),
       body: Consumer<UserProvider>(
         builder: (context, value, child) => value.walletuserid.isEmpty
-            ? const Center(child: CircularProgressIndicator())
+            ? LoginScreen()
             : Padding(
                 padding: const EdgeInsets.all(20.0),
                 child: Column(

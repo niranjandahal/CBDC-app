@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../widgets/notification_card.dart'; // Import the reusable widget
+import '../../widgets/notification_card.dart'; // Import the reusable widget
 
 class NotificationsScreen extends StatelessWidget {
   @override

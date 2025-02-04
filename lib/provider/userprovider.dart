@@ -1,20 +1,27 @@
 import 'dart:convert';
-import 'package:cbdc/screens/login_screen.dart';
+import 'package:cbdc/screens/auth/login_screen.dart';
 import 'package:cbdc/screens/main_navigation.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import 'package:persistent_bottom_nav_bar/persistent_bottom_nav_bar.dart';
+import 'dart:async';
 
 class UserProvider with ChangeNotifier {
-  static const String baseUrl = "https://cbdc-backend.vercel.app/api/v1";
+  static const String baseUrl = "http://192.168.10.66:5000/api/v1";
+  // Timer? _balanceTimer;
+
+  List _transactions = [];
+  bool isrecenttranscationloading = false;
 
   String _walletuserid = "";
   String _fullName = "";
   String _email = "";
   double _balance = -1;
 
-  List<dynamic> _transactions = [];
+  bool _isTransactionInProgress = false;
+
+  bool get isTransactionInProgress => _isTransactionInProgress;
 
   // 👀 Getters 👀
 
@@ -34,6 +41,8 @@ class UserProvider with ChangeNotifier {
   // 👀 Check if User is Logged In 👀
 
   Future<bool> checkLoginState() async {
+    if (_walletuserid.isNotEmpty) return true;
+
     final prefs = await SharedPreferences.getInstance();
     _walletuserid = prefs.getString("wallet_id") ?? "";
     notifyListeners();
@@ -56,9 +65,13 @@ class UserProvider with ChangeNotifier {
 
     final responseData = jsonDecode(response.body);
     if (response.statusCode == 201) {
-      print(responseData);
+      print(
+          "User registered successfully and here is the response data!!!! ............{{{{{}}}}}}}]]]]]]] data :::::::"
+          "$responseData");
       _setDataOfUseronLoginAndSignUp(responseData["user"]);
-      _savewalletuserid(_walletuserid);
+      await _savewalletuserid(_walletuserid);
+      notifyListeners();
+
       PersistentNavBarNavigator.pushNewScreen(
         context,
         screen: MainNavigation(),
@@ -86,15 +99,25 @@ class UserProvider with ChangeNotifier {
       }),
     );
 
+    print("waiting for reponse body");
+
     if (response.statusCode == 200) {
       final responseData = jsonDecode(response.body);
+      print("User Logged IN successfully: $responseData");
+
+      // Wait for data storage to complete
       _setDataOfUseronLoginAndSignUp(responseData["user"]);
-      print(responseData);
-      _savewalletuserid(_walletuserid);
+      await _savewalletuserid(_walletuserid);
+
+      print("Checking for wallet id: $_walletuserid");
+
+      notifyListeners();
+
+      // Now navigate to MainNavigation
       PersistentNavBarNavigator.pushNewScreen(
         context,
         screen: MainNavigation(),
-        withNavBar: true, // OPTIONAL VALUE. True by default.
+        withNavBar: true,
         pageTransitionAnimation: PageTransitionAnimation.cupertino,
       );
     } else {
@@ -105,26 +128,80 @@ class UserProvider with ChangeNotifier {
     }
   }
 
-  // 👀 Fetch User Details 👀
+//👀 Function to set transaction PIN 👀
+  Future<void> setTransactionPin(
+      BuildContext context, String transactionPin) async {
+    if (_walletuserid.isEmpty) return;
 
+    try {
+      final response = await http.post(
+        Uri.parse("$baseUrl/user/setpin"),
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode({
+          "transactionPin": transactionPin,
+          "userId": _walletuserid,
+        }),
+      );
+
+      print("Set PIN API Response: ${response.body}");
+
+      if (response.statusCode == 200) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Transaction PIN set successfully!")),
+        );
+        PersistentNavBarNavigator.pushNewScreen(
+          context,
+          screen: MainNavigation(),
+          withNavBar: false, // OPTIONAL VALUE. True by default.
+          pageTransitionAnimation: PageTransitionAnimation.cupertino,
+        );
+      } else {
+        print("Failed to set PIN: ${response.body}");
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+              content: Text("Error: ${jsonDecode(response.body)['message']}")),
+        );
+      }
+    } catch (e) {
+      print("Exception while setting PIN: $e");
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Network error. Please try again.")),
+      );
+    }
+  }
+
+  // 👀 Fetch User Details 👀
   Future<void> fetchUserInfo() async {
     if (_walletuserid.isEmpty) return;
 
-    if (_fullName.isEmpty || _balance == -1 || _email.isEmpty) {
-      final response = await http.post(
-        Uri.parse("$baseUrl/user/details"),
-        headers: {"Content-Type": "application/json"},
-        body: jsonEncode({"walletuserid": _walletuserid}),
+    print("fetch user infor $_walletuserid");
+
+    try {
+      print(" try fetch user infor $_walletuserid");
+
+      final response = await http.get(
+        Uri.parse("$baseUrl/user/showme/$_walletuserid"), // UserID in URL
+        headers: {
+          "Content-Type": "application/json",
+        },
       );
+      print("fetch user infor $_walletuserid");
+
+      print("fetch user function Response Status Code: ${response.statusCode}");
+      print("Response Body: ${response.body}");
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-        _setDataOfUseronLoginAndSignUp(data);
+        print("User details fetched successfully: $data");
+        _setDataOfUseronLoginAndSignUp(data["user"]);
+        notifyListeners();
       } else {
+        print("Failed to fetch user info. Status code: ${response.statusCode}");
+        print("Response body: ${response.body}");
         throw Exception("Failed to fetch user info");
       }
-    } else {
-      return;
+    } catch (error) {
+      print("Error fetching user info: $error");
     }
   }
 
@@ -133,14 +210,56 @@ class UserProvider with ChangeNotifier {
   Future<void> fetchTransactions() async {
     if (_walletuserid.isEmpty) return;
 
-    final response = await http.post(
-      Uri.parse("$baseUrl/transaction/history"),
+    isrecenttranscationloading = true; // Start loading
+    notifyListeners();
+
+    print("fetch transc aclled");
+
+    try {
+      final response = await http.get(
+        Uri.parse("$baseUrl/transactions/$_walletuserid"),
+        headers: {"Content-Type": "application/json"},
+      );
+
+      if (response.statusCode == 200) {
+        print("fetchTransaction response incoming:");
+
+        List<dynamic> transactions = jsonDecode(response.body)['transactions'];
+
+        _transactions = transactions.map((transaction) {
+          bool isCredit = transaction['sender']['_id'] == _walletuserid;
+          return {
+            ...transaction,
+            'isCredit': isCredit,
+          };
+        }).toList();
+      } else {
+        _transactions = [];
+        print("Failed to fetch transactions. Response: ${response.body}");
+      }
+    } catch (e) {
+      _transactions = [];
+      print("Error fetching transactions: $e");
+    }
+
+    isrecenttranscationloading = false; // Stop loading
+    notifyListeners();
+  }
+
+  // 👀 Fetch individual transcations 👀
+  Future<void> fetchindvidualTransactions() async {
+    if (_walletuserid.isEmpty) return;
+
+    final response = await http.get(
+      Uri.parse("$baseUrl/transactions/$_walletuserid"),
       headers: {"Content-Type": "application/json"},
-      body: jsonEncode({"walletuserid": _walletuserid}),
     );
 
     if (response.statusCode == 200) {
       _transactions = jsonDecode(response.body)['transactions'];
+      print(
+          "User transcation successfully and here is the response data!!!! ............{{{{{}}}}}}}]]]]]]] data :::::::"
+          "$_transactions");
       notifyListeners();
     } else {
       throw Exception("Failed to fetch transactions");
@@ -148,89 +267,150 @@ class UserProvider with ChangeNotifier {
   }
 
   void _setDataOfUseronLoginAndSignUp(Map<String, dynamic> data) {
-    _fullName = data['name'] ?? "";
-    _walletuserid = data['userId'] ?? "";
-    _balance = (data['balance'] ?? 0).toDouble();
-    _email = data['email'] ?? "";
+    // Update only if the values are not already set
+
+    if (_walletuserid.isEmpty) {
+      _walletuserid = data['_id'] ?? "";
+    }
+
+    if (_fullName.isEmpty) {
+      _fullName = data['name'] ?? "";
+    }
+
+    if (_balance == -1) {
+      // Assuming -1 is an invalid balance
+      _balance = (data['balance'] ?? 0).toDouble();
+    }
+
+    if (_email.isEmpty) {
+      _email = data['email'] ?? "";
+    }
+
+    // Debugging prints
+    print("Updated User Info:");
+    print("Full Name: $_fullName");
+    print("Wallet User ID: $_walletuserid");
+    print("Balance: $_balance");
+    print("Email: $_email");
+
     notifyListeners();
   }
 
-  // 👀 Send Money 👀
-
-  Future<void> sendMoney(
-      BuildContext context, String receiverId, double amount) async {
+  Future<void> sendMoney(BuildContext context, String receiverId, double amount,
+      String pin) async {
+    print(pin);
     if (_walletuserid.isEmpty) return;
 
-    final String apiUrl = "$baseUrl/transactions"; // Updated API endpoint
+    if (_isTransactionInProgress) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("A transaction is already in progress")),
+      );
+      return;
+    }
+
+    _isTransactionInProgress = true;
+    notifyListeners();
 
     try {
       final response = await http.post(
-        Uri.parse(apiUrl),
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": "Bearer YOUR_JWT_TOKEN", // Replace with actual token
-        },
+        Uri.parse("$baseUrl/transactions/"),
+        headers: {"Content-Type": "application/json"},
         body: jsonEncode({
+          "senderId": _walletuserid,
           "receiverId": receiverId,
           "amount": amount,
+          "transactionPin": pin,
           "transactionType": "transfer",
           "description": "Money transfer",
         }),
       );
 
-      print("debuggginhg send money");
-
-      print("Response Status Code: ${response.statusCode}");
-      print("Response Body: ${response.body}");
+      print(response.body);
 
       if (response.statusCode == 201) {
         final data = jsonDecode(response.body);
-
-        print(data);
-        // Assuming response contains updated balance
         _balance = (data['balance'] ?? 0).toDouble();
         notifyListeners();
 
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Transaction Successful")),
-        );
+        // Navigate first, then show success message
+        if (context.mounted) {
+          Navigator.of(context).pushAndRemoveUntil(
+            MaterialPageRoute(builder: (context) => MainNavigation()),
+            (route) => false,
+          );
 
-        // Navigate back to home or transaction history screen
-        Navigator.pop(context);
+          // Show success message after navigation
+          Future.microtask(() {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text("Transaction Successful")),
+            );
+          });
+        }
       } else {
         final errorMessage =
             jsonDecode(response.body)['message'] ?? "Transaction failed";
-        print(errorMessage);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(errorMessage)),
-        );
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(errorMessage)),
+          );
+        }
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Error: $e")),
-      );
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Error: $e")),
+        );
+      }
+    } finally {
+      _isTransactionInProgress = false;
+      notifyListeners();
     }
   }
 
   //👀 get balance 👀
 
   Future<void> getBalance() async {
+    print("get balance called");
+
     if (_walletuserid.isEmpty) return;
 
-    final response = await http.post(
-      Uri.parse("$baseUrl/user/balance"),
+    final url = Uri.parse("$baseUrl/user/getbalance/$_walletuserid");
+
+    final response = await http.get(
+      url,
       headers: {"Content-Type": "application/json"},
-      body: jsonEncode({"walletuserid": _walletuserid}),
     );
 
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
+      print("User balance fetched successfully: $data");
+
       _balance = (data['balance'] ?? 0).toDouble();
       notifyListeners();
     } else {
-      throw Exception("Failed to fetch user info");
+      print("Failed to fetch user balance: ${response.body}");
+      throw Exception("Failed to fetch user balance");
     }
   }
+
+  // // Start the periodic balance update
+  // void startPeriodicBalanceUpdate() {
+  //   _balanceTimer = Timer.periodic(Duration(minutes: 2), (timer) {
+  //     getBalance(); // Refresh balance every minute
+  //     fetchTransactions(); // Refresh transactions every minute
+  //   });
+  // }
+
+  // // Stop the periodic balance update
+  // void stopPeriodicBalanceUpdate() {
+  //   _balanceTimer?.cancel();
+  // }
+
+  // @override
+  // void dispose() {
+  //   stopPeriodicBalanceUpdate(); // Cancel timer when no longer needed
+  //   super.dispose();
+  // }
 
   // 👀 Logout User 👀
 

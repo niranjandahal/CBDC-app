@@ -1,12 +1,12 @@
 import 'package:cbdc/provider/userprovider.dart';
-import 'package:cbdc/screens/login_screen.dart';
-import 'package:cbdc/screens/notifications_screen.dart';
+import 'package:cbdc/screens/auth/login_screen.dart';
+import 'package:cbdc/screens/navbarmenu/notifications_screen.dart';
 import 'package:flutter/material.dart';
 import "package:persistent_bottom_nav_bar/persistent_bottom_nav_bar.dart";
-import 'dashboard_screen.dart';
-import 'transaction_history_screen.dart';
-import 'settings_screen.dart';
-import 'qrscan_page.dart';
+import 'navbarmenu/dashboard_screen.dart';
+import 'navbarmenu/transaction_history_screen.dart';
+import 'navbarmenu/settings_screen.dart';
+import 'utils/qrscan_page.dart';
 import 'package:provider/provider.dart';
 import 'package:cbdc/provider/theme_provider.dart';
 
@@ -22,11 +22,17 @@ class _MainNavigationState extends State<MainNavigation> {
   @override
   void initState() {
     super.initState();
-
     // Ensure that user info is fetched when walletuserid is not empty
+
+    print(
+        "IIIIIIIIIIIIIINNNNNNNNNNNIIIIIIITTTT SSSSTTTAAAAAAATTTTTTTEEE CCCCCAAAAALLLLLLLLLEEEEEEEDD");
     final userProvider = Provider.of<UserProvider>(context, listen: false);
 
     // Fetch user info if walletuserid is available
+
+    print("PPPrrrINting WAllet user id before man nva is loaded : ::::::::");
+    print(userProvider.walletuserid);
+    print("si there wallet id");
     if (userProvider.walletuserid.isNotEmpty) {
       userProvider.fetchUserInfo();
     }

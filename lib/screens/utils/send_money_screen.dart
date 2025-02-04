@@ -1,5 +1,7 @@
 import 'package:cbdc/provider/userprovider.dart';
+import 'package:cbdc/screens/transcations/transcationpinCheck.dart';
 import 'package:flutter/material.dart';
+import 'package:persistent_bottom_nav_bar/persistent_bottom_nav_bar.dart';
 import 'package:provider/provider.dart';
 
 class SendMoneyScreen extends StatefulWidget {
@@ -180,9 +182,26 @@ class _SendMoneyScreenState extends State<SendMoneyScreen> {
                                 Text("You cannot send money to yourself!")),
                       );
                     } else {
+                      PersistentNavBarNavigator.pushNewScreen(
+                        context,
+                        screen: TransactionPin(
+                            receiverId: receiverController.text,
+                            amount: double.parse(amountController.text)),
+                        withNavBar: false,
+                        pageTransitionAnimation:
+                            PageTransitionAnimation.cupertino,
+                      );
+
                       // Proceed with sending money
-                      Provider.of<UserProvider>(context, listen: false)
-                          .sendMoney(context, receiverController.text, amount);
+                      // PersistentNavBarNavigator.pushNewScreen(
+                      //   context,
+                      //   screen: TranscationPin(),
+                      //   withNavBar: false,
+                      //   pageTransitionAnimation:
+                      //       PageTransitionAnimation.cupertino,
+                      // );
+                      // Provider.of<UserProvider>(context, listen: false)
+                      //     .sendMoney(context, receiverController.text, amount);
                     }
                   } else {
                     ScaffoldMessenger.of(context).showSnackBar(

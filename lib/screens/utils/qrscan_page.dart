@@ -65,7 +65,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:qr_code_scanner_plus/qr_code_scanner_plus.dart';
-import 'package:cbdc/screens/send_money_screen.dart'; // Import SendMoneyScreen
+import 'package:cbdc/screens/utils/send_money_screen.dart'; // Import SendMoneyScreen
 
 class QRScanPage extends StatefulWidget {
   @override

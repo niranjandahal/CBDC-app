@@ -1,10 +1,11 @@
 import 'package:cbdc/provider/theme_provider.dart';
-import 'package:cbdc/widgets/transaction_card.dart';
+import 'package:cbdc/screens/transcations/recenttranscation.dart';
+// import 'package:cbdc/widgets/transaction_card.dart';
 import 'package:flutter/material.dart';
-import '../widgets/balance_card.dart'; 
-import 'send_money_screen.dart';
-import 'receive_money_screen.dart';
-import 'profile_screen.dart';
+import '../../widgets/balance_card.dart';
+import '../utils/send_money_screen.dart';
+import '../utils/receive_money_screen.dart';
+import '../utils/profile_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:persistent_bottom_nav_bar/persistent_bottom_nav_bar.dart';
 
@@ -53,7 +54,6 @@ class DashboardScreen extends StatelessWidget {
                       pageTransitionAnimation:
                           PageTransitionAnimation.cupertino,
                     ),
-                   
                   ),
                   _actionButton(
                     context,
@@ -93,19 +93,7 @@ class DashboardScreen extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 10),
-              ListView.builder(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                itemCount: 5, // Hardcoded for now
-                itemBuilder: (context, index) {
-                  return TransactionCard(
-                    title: "Transfer to User ${index + 1}",
-                    subtitle: "Successful",
-                    amount: "-\Rs ${(index + 1) * 100}",
-                    isCredit: false,
-                  );
-                },
-              ),
+              RecentTranscation(),
             ],
           ),
         ),
