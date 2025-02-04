@@ -8,7 +8,9 @@ import 'package:persistent_bottom_nav_bar/persistent_bottom_nav_bar.dart';
 import 'dart:async';
 
 class UserProvider with ChangeNotifier {
-  static const String baseUrl = "http://192.168.10.66:5000/api/v1";
+  // static const String baseUrl = "http://192.168.10.66:5000/api/v1";
+  static const String baseUrl = "https://cbdc-backend.vercel.app/api/v1";
+
   // Timer? _balanceTimer;
 
   List _transactions = [];
