@@ -1,6 +1,7 @@
 import 'package:cbdc/provider/userprovider.dart';
 import 'package:cbdc/screens/main_navigation.dart';
 import 'package:cbdc/screens/auth/signup_screen.dart';
+import 'package:cbdc/screens/utils/kycverification.dart';
 import 'package:flutter/material.dart';
 // import 'package:local_auth/local_auth.dart';
 // import 'package:cbdc/provider/userprovider.dart';
@@ -174,10 +175,14 @@ class _LoginScreenState extends State<LoginScreen> {
                                 ),
                                 TextButton(
                                   onPressed: () {
-                                    // Handle forgot password button tap
+                                    Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                            builder: (context) =>
+                                                KycVerificationScreen()));
                                   },
                                   child: const Text(
-                                    'Forgot Password?',
+                                    'kyc verification/forgot password Password?',
                                     style: TextStyle(
                                       color: Colors.blue,
                                     ),

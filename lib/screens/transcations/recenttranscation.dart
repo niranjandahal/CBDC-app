@@ -12,17 +12,17 @@ class RecentTranscation extends StatefulWidget {
 }
 
 class _RecentTranscationState extends State<RecentTranscation> {
+  bool isFetched = false; // Flag to check if data has been fetched
+
   @override
-  void initState() {
-    super.initState();
+  void didChangeDependencies() {
+    super.didChangeDependencies();
 
-    print("init state called");
-
-    // Fetch transactions only once when the widget initializes
-    Future.microtask(() {
+    if (!isFetched) {
       final userProvider = Provider.of<UserProvider>(context, listen: false);
       userProvider.fetchTransactions();
-    });
+      isFetched = true; // Mark as fetched
+    }
   }
 
   @override
@@ -32,14 +32,17 @@ class _RecentTranscationState extends State<RecentTranscation> {
         final transactions = userProvider.transactions;
         final isLoading = userProvider.isrecenttranscationloading;
 
+        // Loading indicator
         if (isLoading) {
           return const Center(child: CircularProgressIndicator());
         }
 
+        // No transactions found
         if (transactions.isEmpty) {
           return const Center(child: Text("No transactions found."));
         }
 
+        // List of recent transactions
         return ListView.builder(
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
@@ -64,13 +67,6 @@ class _RecentTranscationState extends State<RecentTranscation> {
                 isCredit: transaction['isCredit'],
               ),
             );
-
-            // return TransactionCard(
-            //   title: "${transaction['receiver']['name']}",
-            //   subtitle: transaction['status'],
-            //   amount: "-\Rs ${transaction['amount']}",
-            //   isCredit: transaction['isCredit'],
-            // );
           },
         );
       },

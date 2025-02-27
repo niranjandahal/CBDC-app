@@ -2,14 +2,16 @@ import 'dart:convert';
 import 'package:cbdc/screens/auth/login_screen.dart';
 import 'package:cbdc/screens/main_navigation.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import 'package:persistent_bottom_nav_bar/persistent_bottom_nav_bar.dart';
 import 'dart:async';
+import 'package:http_parser/http_parser.dart';
 
 class UserProvider with ChangeNotifier {
-  // static const String baseUrl = "http://192.168.10.66:5000/api/v1";
-  static const String baseUrl = "https://cbdc-backend.vercel.app/api/v1";
+  static const String baseUrl = "http://192.168.10.77:5000/api/v1";
+  // static const String baseUrl = "https://cbdc-backend.vercel.app/api/v1";
 
   // Timer? _balanceTimer;
 
@@ -20,10 +22,17 @@ class UserProvider with ChangeNotifier {
   String _fullName = "";
   String _email = "";
   double _balance = -1;
+  String _userImageurl = "";
+  String _governmentIdImageUrl = "";
+  String _dob = "";
+  String _citizenidno = "";
 
   bool _isTransactionInProgress = false;
 
   bool get isTransactionInProgress => _isTransactionInProgress;
+
+  //kyc
+  String _kycStatus = "Pending"; // You can set default as "Pending"
 
   // 👀 Getters 👀
 
@@ -32,6 +41,16 @@ class UserProvider with ChangeNotifier {
   String get email => _email;
   double get balance => _balance;
   List<dynamic> get transactions => _transactions;
+
+  String get userImageurl => _userImageurl;
+  String get governmentIdImageUrl => _governmentIdImageUrl;
+  String get dob => _dob;
+  String get citizenidno => _citizenidno;
+  String get baseurl => baseUrl;
+
+  //kyc
+
+  String get kycStatus => _kycStatus;
 
   // 👀  Save Wallet ID to SharedPreferences 👀
 
@@ -288,12 +307,17 @@ class UserProvider with ChangeNotifier {
       _email = data['email'] ?? "";
     }
 
+    _kycStatus = data['kycStatus'] ?? "Pending";
+    _dob = data['dateOfBirth'] ?? "";
+    _citizenidno = data['governmentIdNumber'] ?? "";
+
     // Debugging prints
     print("Updated User Info:");
     print("Full Name: $_fullName");
     print("Wallet User ID: $_walletuserid");
     print("Balance: $_balance");
     print("Email: $_email");
+    // print("kycstatus": _kycStatus);
 
     notifyListeners();
   }
@@ -395,26 +419,112 @@ class UserProvider with ChangeNotifier {
     }
   }
 
-  // // Start the periodic balance update
-  // void startPeriodicBalanceUpdate() {
-  //   _balanceTimer = Timer.periodic(Duration(minutes: 2), (timer) {
-  //     getBalance(); // Refresh balance every minute
-  //     fetchTransactions(); // Refresh transactions every minute
-  //   });
-  // }
+  //👀 submit KYC 👀
+  Future<void> submitKYC(
+    BuildContext context,
+    String dob,
+    String idNumber,
+    XFile profileImage,
+    XFile idCardImage,
+  ) async {
+    if (_walletuserid.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("User not logged in!")),
+      );
+      return;
+    }
 
-  // // Stop the periodic balance update
-  // void stopPeriodicBalanceUpdate() {
-  //   _balanceTimer?.cancel();
-  // }
+    try {
+      var request = http.MultipartRequest(
+        "POST",
+        Uri.parse("$baseUrl/images/complete-registration/$_walletuserid"),
+      );
 
-  // @override
-  // void dispose() {
-  //   stopPeriodicBalanceUpdate(); // Cancel timer when no longer needed
-  //   super.dispose();
-  // }
+      request.fields['dateOfBirth'] = dob;
+      request.fields['governmentIdNumber'] = idNumber;
 
-  // 👀 Logout User 👀
+      // Add files with explicit content type
+      request.files.add(
+        await http.MultipartFile.fromPath(
+          'profilePhoto',
+          profileImage.path,
+          contentType: MediaType('image', 'jpeg'), // Adjust based on file type
+        ),
+      );
+      request.files.add(
+        await http.MultipartFile.fromPath(
+          'governmentIdImage',
+          idCardImage.path,
+          contentType: MediaType('image', 'jpeg'), // Adjust based on file type
+        ),
+      );
+
+      var response = await request.send();
+      var responseBody = await response.stream.bytesToString();
+
+      if (response.statusCode == 200) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("KYC Submitted Successfully! ✅")),
+        );
+        _kycStatus = "Submitted";
+        notifyListeners();
+      } else {
+        String errorMessage =
+            jsonDecode(responseBody)['message'] ?? "KYC submission failed";
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(errorMessage)),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Error submitting KYC: $e")),
+      );
+    }
+  }
+
+//   //👀 Function to Fetch KYC Details 👀
+
+  // Future<void> getKYCDetails() async {
+  //   if (_walletuserid.isEmpty) return;
+
+  //   try {
+  //     final response = await http.get(
+  //       Uri.parse("$baseUrl/images/profile/$_walletuserid"),
+  //       headers: {"Content-Type": "application/json"},
+  //     );
+
+  //     if (response.statusCode == 200) {
+  //       final data = jsonDecode(response.body);
+  //       _kycDetails = data['kycDetails'];
+  //       _kycStatus = data['kycStatus'] ?? "Pending";
+  //       notifyListeners();
+  //     } else {
+  //       print("Failed to fetch KYC details: ${response.body}");
+  //     }
+  //   } catch (e) {
+  //     print("Error fetching KYC details: $e");
+  //   }
+  // }
+// // Start the periodic balance update
+// void startPeriodicBalanceUpdate() {
+//   _balanceTimer = Timer.periodic(Duration(minutes: 2), (timer) {
+//     getBalance(); // Refresh balance every minute
+//     fetchTransactions(); // Refresh transactions every minute
+//   });
+// }
+
+// // Stop the periodic balance update
+// void stopPeriodicBalanceUpdate() {
+//   _balanceTimer?.cancel();
+// }
+
+// @override
+// void dispose() {
+//   stopPeriodicBalanceUpdate(); // Cancel timer when no longer needed
+//   super.dispose();
+// }
+
+// 👀 Logout User 👀
 
   Future<void> logout(BuildContext context) async {
     final prefs = await SharedPreferences.getInstance();
