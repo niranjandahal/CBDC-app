@@ -10,8 +10,8 @@ import 'dart:async';
 import 'package:http_parser/http_parser.dart';
 
 class UserProvider with ChangeNotifier {
-  static const String baseUrl = "http://192.168.10.77:5000/api/v1";
-  // static const String baseUrl = "https://cbdc-backend.vercel.app/api/v1";
+  // static const String baseUrl = "http://192.168.10.77:5000/api/v1";
+  static const String baseUrl = "https://cbdc-backend.vercel.app/api/v1";
 
   // Timer? _balanceTimer;
 
@@ -537,11 +537,10 @@ class UserProvider with ChangeNotifier {
     _transactions = [];
 
     notifyListeners();
-    PersistentNavBarNavigator.pushNewScreen(
-      context,
-      screen: LoginScreen(),
-      withNavBar: false, // OPTIONAL VALUE. True by default.
-      pageTransitionAnimation: PageTransitionAnimation.cupertino,
+    //naviagate to login screen removing each and everythings from stack as new one
+    Navigator.of(context).pushAndRemoveUntil(
+      MaterialPageRoute(builder: (context) => LoginScreen()),
+      (route) => false,
     );
   }
 }
