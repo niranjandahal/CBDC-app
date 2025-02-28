@@ -1,4 +1,6 @@
 import 'package:cbdc/provider/userprovider.dart';
+import 'package:cbdc/screens/auth/biometric_auth.dart';
+import 'package:cbdc/screens/main_navigation.dart';
 import 'package:cbdc/screens/utils/setuptranscpin.dart';
 import 'package:flutter/material.dart';
 import 'package:persistent_bottom_nav_bar/persistent_bottom_nav_bar.dart';
@@ -33,6 +35,15 @@ class SettingsScreen extends StatelessWidget {
                     withNavBar: false, // OPTIONAL VALUE. True by default.
                     pageTransitionAnimation: PageTransitionAnimation.cupertino,
                   ) //👀 Calls logout function
+              ),
+          ListTile(
+              leading: const Icon(Icons.fingerprint),
+              title: const Text("Setup Biometric Authentication"),
+              onTap: () => Biometricauth().checkBiometric(
+                  context,
+                  MainNavigation(),
+                  SettingsScreen(),
+                  true) //👀 Calls logout function
               ),
         ],
       ),

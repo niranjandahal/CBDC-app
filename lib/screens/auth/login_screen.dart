@@ -1,10 +1,12 @@
 import 'package:cbdc/provider/userprovider.dart';
+import 'package:cbdc/screens/auth/biometric_auth.dart';
 import 'package:cbdc/screens/main_navigation.dart';
 import 'package:cbdc/screens/auth/signup_screen.dart';
 import 'package:cbdc/screens/utils/kycverification.dart';
 import 'package:flutter/material.dart';
 // import 'package:local_auth/local_auth.dart';
 // import 'package:cbdc/provider/userprovider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:provider/provider.dart';
 import 'package:cbdc/provider/theme_provider.dart';
 import 'package:persistent_bottom_nav_bar/persistent_bottom_nav_bar.dart';
@@ -17,6 +19,8 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   TextEditingController emailController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
+  final FocusNode _emailFocusNode = FocusNode();
+  bool showbiometric = false;
 
   void _loginuser() async {
     print("loginfunc called");
@@ -25,6 +29,33 @@ class _LoginScreenState extends State<LoginScreen> {
     await userprovider.loginUser(
         context, emailController.text, passwordController.text);
     print("loginfunc called");
+  }
+
+  @override
+  void initState() {
+    super.initState();
+
+    // Ensure the keyboard opens automatically after logout
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      FocusScope.of(context).requestFocus(_emailFocusNode);
+    });
+
+    final Future<SharedPreferences> prefs = SharedPreferences.getInstance();
+
+    prefs.then((SharedPreferences prefs) {
+      String isloggedin = prefs.getString('wallet_id') ?? "";
+      bool isbiometricenabled = prefs.getBool('isbiometricenabled') ?? false;
+
+      if (isloggedin.isNotEmpty && isbiometricenabled) {
+        setState(() {
+          showbiometric = true;
+        });
+      } else {
+        setState(() {
+          showbiometric = false;
+        });
+      }
+    });
   }
 
   @override
@@ -173,21 +204,35 @@ class _LoginScreenState extends State<LoginScreen> {
                                     ),
                                   ),
                                 ),
-                                TextButton(
-                                  onPressed: () {
-                                    Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                            builder: (context) =>
-                                                KycVerificationScreen()));
-                                  },
-                                  child: const Text(
-                                    'kyc verification/forgot password Password?',
-                                    style: TextStyle(
-                                      color: Colors.blue,
-                                    ),
-                                  ),
-                                ),
+                                //Biometric option
+
+                                showbiometric
+                                    ? GestureDetector(
+                                        onTap: () => Biometricauth()
+                                            .checkBiometric(
+                                                context,
+                                                MainNavigation(),
+                                                LoginScreen(),
+                                                false),
+                                        child: Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                          children: [
+                                            const Icon(
+                                              Icons.fingerprint,
+                                              color: Colors.white,
+                                            ),
+                                            const SizedBox(width: 10),
+                                            const Text(
+                                              'Tap to login with biometric',
+                                              style: TextStyle(
+                                                color: Colors.white,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      )
+                                    : Container(),
                               ],
                             ),
                           ),

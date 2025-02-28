@@ -1,7 +1,11 @@
+import 'package:cbdc/screens/auth/biometric_auth.dart';
+import 'package:cbdc/screens/transcations/transcatoinsucces.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:pinput/pinput.dart';
 import 'package:cbdc/provider/userprovider.dart';
+import 'package:local_auth/local_auth.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class TransactionPin extends StatefulWidget {
   final String receiverId;
@@ -16,11 +20,24 @@ class TransactionPin extends StatefulWidget {
 
 class _TransactionPinState extends State<TransactionPin> {
   final TextEditingController _pinController = TextEditingController();
+  final Biometricauth _biometricauth = Biometricauth();
 
   @override
   void dispose() {
     _pinController.dispose();
     super.dispose();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    // Check biometric on page load
+    _biometricauth.checkBiometric(
+      context,
+      TranscationSucess(), // Success screen
+      const TransactionPin(receiverId: "", amount: 0.0), // Failure screen
+      false, // Assuming biometric setup status is false (you can update it accordingly)
+    );
   }
 
   @override

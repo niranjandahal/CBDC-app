@@ -17,13 +17,13 @@ class UserProvider with ChangeNotifier {
 
   List _transactions = [];
   bool isrecenttranscationloading = false;
-
+  bool showbalance = false;
   String _walletuserid = "";
   String _fullName = "";
   String _email = "";
   double _balance = -1;
-  String _userImageurl = "";
-  String _governmentIdImageUrl = "";
+  // String _userImageurl = "";
+  // String _governmentIdImageUrl = "";
   String _dob = "";
   String _citizenidno = "";
 
@@ -35,15 +35,14 @@ class UserProvider with ChangeNotifier {
   String _kycStatus = "Pending"; // You can set default as "Pending"
 
   // 👀 Getters 👀
-
   String get walletuserid => _walletuserid;
   String get fullName => _fullName;
   String get email => _email;
   double get balance => _balance;
   List<dynamic> get transactions => _transactions;
 
-  String get userImageurl => _userImageurl;
-  String get governmentIdImageUrl => _governmentIdImageUrl;
+  // String get userImageurl => _userImageurl;
+  // String get governmentIdImageUrl => _governmentIdImageUrl;
   String get dob => _dob;
   String get citizenidno => _citizenidno;
   String get baseurl => baseUrl;
@@ -51,6 +50,13 @@ class UserProvider with ChangeNotifier {
   //kyc
 
   String get kycStatus => _kycStatus;
+
+  // 👀 toogle show balance 👀
+
+  void toogleShowBalance() {
+    showbalance = !showbalance;
+    notifyListeners();
+  }
 
   // 👀  Save Wallet ID to SharedPreferences 👀
 
@@ -311,6 +317,10 @@ class UserProvider with ChangeNotifier {
     _dob = data['dateOfBirth'] ?? "";
     _citizenidno = data['governmentIdNumber'] ?? "";
 
+    print("kyc status: $_kycStatus");
+    print("dob: $_dob");
+    print("citizenidno: $_citizenidno");
+
     // Debugging prints
     print("Updated User Info:");
     print("Full Name: $_fullName");
@@ -529,15 +539,25 @@ class UserProvider with ChangeNotifier {
   Future<void> logout(BuildContext context) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove("wallet_id");
+    await prefs.setBool('isloggedin', false);
+    await prefs.setBool('isbiometricenabled', false);
 
     _walletuserid = "";
     _fullName = "";
     _email = "";
     _balance = -1;
     _transactions = [];
+    // _userImageurl = "";
+    // _governmentIdImageUrl = "";
+    _dob = "";
+    _citizenidno = "";
 
     notifyListeners();
-    //naviagate to login screen removing each and everythings from stack as new one
+
+    // Close the keyboard before navigating
+    FocusScope.of(context).unfocus();
+
+    // Navigate to login screen, clearing the stack
     Navigator.of(context).pushAndRemoveUntil(
       MaterialPageRoute(builder: (context) => LoginScreen()),
       (route) => false,

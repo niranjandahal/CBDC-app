@@ -1,11 +1,11 @@
 import 'package:cbdc/provider/userprovider.dart';
-import 'package:cbdc/screens/transcations/transcationpinCheck.dart';
+import 'package:cbdc/screens/utils/send_money_reciever_detail_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:persistent_bottom_nav_bar/persistent_bottom_nav_bar.dart';
 import 'package:provider/provider.dart';
 
 class SendMoneyScreen extends StatefulWidget {
-  final String? scannedWalletId; // Accept scanned Wallet ID (optional)
+  final String? scannedWalletId;
 
   const SendMoneyScreen({Key? key, this.scannedWalletId}) : super(key: key);
 
@@ -15,15 +15,6 @@ class SendMoneyScreen extends StatefulWidget {
 
 class _SendMoneyScreenState extends State<SendMoneyScreen> {
   late TextEditingController receiverController;
-  final TextEditingController amountController = TextEditingController();
-  String? selectedPurpose = "Food & Beverage"; // Default selected purpose
-  final List<String> purposes = [
-    "Food & Beverage",
-    "Education",
-    "Entertainment",
-    "Health",
-    "Others"
-  ];
 
   @override
   void initState() {
@@ -35,184 +26,238 @@ class _SendMoneyScreenState extends State<SendMoneyScreen> {
   @override
   Widget build(BuildContext context) {
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Send Money"),
+        title: const Text("Send Money",
+            style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+        backgroundColor: isDarkMode ? Colors.black : Colors.blueAccent,
+        elevation: 0,
       ),
       body: Consumer<UserProvider>(
         builder: (context, value, child) => Padding(
-          padding: const EdgeInsets.all(20.0),
-          child: Column(
-            children: [
-              // Card for balance display
-              Card(
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(15)),
-                elevation: 5,
-                color: isDarkMode ? Colors.grey[850] : Colors.blue[50],
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text("Balance",
-                          style: TextStyle(
-                              fontSize: 18, fontWeight: FontWeight.bold)),
-                      Text("\$${value.balance.toStringAsFixed(2)}",
-                          style: TextStyle(
-                              fontSize: 18, fontWeight: FontWeight.bold)),
-                    ],
-                  ),
-                ),
-              ),
-              const SizedBox(height: 20),
-
-              // Receiver Wallet ID input
-              TextField(
-                controller: receiverController,
-                decoration: InputDecoration(
-                  labelText: "Receiver Wallet ID",
-                  labelStyle: TextStyle(
-                      color: isDarkMode ? Colors.white70 : Colors.black87),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(15),
-                    borderSide: BorderSide(
-                        color: isDarkMode ? Colors.white38 : Colors.grey),
-                  ),
-                  filled: true,
-                  fillColor: isDarkMode ? Colors.grey[800] : Colors.white,
-                  contentPadding:
-                      EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                ),
-              ),
-              const SizedBox(height: 20),
-
-              // Amount input
-              TextField(
-                controller: amountController,
-                decoration: InputDecoration(
-                  labelText: "Amount",
-                  labelStyle: TextStyle(
-                      color: isDarkMode ? Colors.white70 : Colors.black87),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(15),
-                    borderSide: BorderSide(
-                        color: isDarkMode ? Colors.white38 : Colors.grey),
-                  ),
-                  filled: true,
-                  fillColor: isDarkMode ? Colors.grey[800] : Colors.white,
-                  contentPadding:
-                      EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                ),
-                keyboardType: TextInputType.number,
-              ),
-              const SizedBox(height: 20),
-
-              // Purpose dropdown menu
-              DropdownButtonFormField<String>(
-                value: selectedPurpose,
-                items: purposes.map((String purpose) {
-                  return DropdownMenuItem<String>(
-                    value: purpose,
-                    child: Text(purpose,
-                        style: TextStyle(
-                            color: isDarkMode ? Colors.white : Colors.black)),
-                  );
-                }).toList(),
-                onChanged: (value) {
-                  setState(() {
-                    selectedPurpose = value;
-                  });
-                },
-                decoration: InputDecoration(
-                  labelText: "Purpose",
-                  labelStyle: TextStyle(
-                      color: isDarkMode ? Colors.white70 : Colors.black87),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(15),
-                    borderSide: BorderSide(
-                        color: isDarkMode ? Colors.white38 : Colors.grey),
-                  ),
-                  filled: true,
-                  fillColor: isDarkMode ? Colors.grey[800] : Colors.white,
-                  contentPadding:
-                      EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                ),
-              ),
-              const SizedBox(height: 20),
-
-              // Remarks input
-              TextField(
-                decoration: InputDecoration(
-                  labelText: "Remarks (Optional)",
-                  labelStyle: TextStyle(
-                      color: isDarkMode ? Colors.white70 : Colors.black87),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(15),
-                    borderSide: BorderSide(
-                        color: isDarkMode ? Colors.white38 : Colors.grey),
-                  ),
-                  filled: true,
-                  fillColor: isDarkMode ? Colors.grey[800] : Colors.white,
-                  contentPadding:
-                      EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                ),
-                maxLines: 3,
-              ),
-              const SizedBox(height: 30),
-
-              // Send Money button
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.blue,
-                  padding: EdgeInsets.symmetric(vertical: 14, horizontal: 50),
+          padding: const EdgeInsets.all(10.0),
+          child: SingleChildScrollView(
+            child: Column(
+              children: [
+                // Balance Card
+                Card(
+                  elevation: 10,
                   shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(15)),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  color: isDarkMode ? Colors.grey[850] : Colors.white,
+                  child: Padding(
+                    padding: const EdgeInsets.all(10.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Row(
+                          children: [
+                            Icon(Icons.account_balance_wallet,
+                                color:
+                                    isDarkMode ? Colors.white : Colors.black),
+                            const SizedBox(width: 10),
+                            Column(
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                value.showbalance
+                                    ? Text(
+                                        "NPR\$${value.balance.toStringAsFixed(2)}",
+                                        style: TextStyle(
+                                            fontSize: 18,
+                                            fontWeight: FontWeight.bold,
+                                            color: isDarkMode
+                                                ? Colors.white
+                                                : Colors.black),
+                                      )
+                                    : Text(
+                                        "\NPR****",
+                                        style: TextStyle(
+                                            fontSize: 18,
+                                            fontWeight: FontWeight.bold,
+                                            color: isDarkMode
+                                                ? Colors.white
+                                                : Colors.black),
+                                      ),
+                                Text("Balance",
+                                    style: TextStyle(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.bold,
+                                        color: isDarkMode
+                                            ? Colors.white
+                                            : Colors.black)),
+                              ],
+                            ),
+                          ],
+                        ),
+                        //hide or show balance icon
+
+                        value.showbalance
+                            ? IconButton(
+                                onPressed: () {
+                                  value.toogleShowBalance();
+                                },
+                                icon: Icon(Icons.visibility,
+                                    color: isDarkMode
+                                        ? Colors.white
+                                        : Colors.black),
+                              )
+                            : IconButton(
+                                onPressed: () {
+                                  value.toogleShowBalance();
+                                },
+                                icon: Icon(Icons.visibility_off,
+                                    color: isDarkMode
+                                        ? Colors.white
+                                        : Colors.black),
+                              )
+                      ],
+                    ),
+                  ),
                 ),
-                onPressed: () {
-                  double amount = double.tryParse(amountController.text) ?? 0.0;
+                const SizedBox(height: 15),
 
-                  if (amount > 0 && receiverController.text.isNotEmpty) {
-                    // Check if the receiver's wallet ID matches the user's wallet ID
-                    if (receiverController.text == value.walletuserid) {
-                      // Show error message if receiver is the same as the sender
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                            content:
-                                Text("You cannot send money to yourself!")),
-                      );
-                    } else {
-                      PersistentNavBarNavigator.pushNewScreen(
-                        context,
-                        screen: TransactionPin(
-                            receiverId: receiverController.text,
-                            amount: double.parse(amountController.text)),
-                        withNavBar: false,
-                        pageTransitionAnimation:
-                            PageTransitionAnimation.cupertino,
-                      );
+                // Recent Fund Transfer List (Horizontal ListView)
+                Card(
+                  color: isDarkMode ? Colors.grey[850] : Colors.white,
+                  child: Container(
+                    padding: const EdgeInsets.all(12.0),
+                    // decoration: BoxDecoration(
+                    //   color: isDarkMode ? Colors.blueGrey[850] : Colors.blue[50],
+                    //   borderRadius: BorderRadius.circular(10),
+                    //   boxShadow: [
+                    //     BoxShadow(
+                    //         color: Colors.black.withOpacity(0.1),
+                    //         blurRadius: 8,
+                    //         offset: Offset(0, 4)),
+                    //   ],
+                    // ),
+                    child: SizedBox(
+                      height:
+                          70, // Set fixed height for the horizontal list view
+                      child: ListView(
+                        scrollDirection: Axis.horizontal,
+                        children: List.generate(5, (index) {
+                          return Card(
+                            margin: const EdgeInsets.only(right: 10),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            elevation: 5,
+                            child: Padding(
+                              padding: const EdgeInsets.all(10.0),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text("Name $index",
+                                      style: TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.bold)),
+                                  SizedBox(height: 5),
+                                  Text(
+                                      "Balance: \$${(100 + index * 20).toStringAsFixed(2)}",
+                                      style: TextStyle(fontSize: 14)),
+                                ],
+                              ),
+                            ),
+                          );
+                        }),
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 15),
 
-                      // Proceed with sending money
-                      // PersistentNavBarNavigator.pushNewScreen(
-                      //   context,
-                      //   screen: TranscationPin(),
-                      //   withNavBar: false,
-                      //   pageTransitionAnimation:
-                      //       PageTransitionAnimation.cupertino,
-                      // );
-                      // Provider.of<UserProvider>(context, listen: false)
-                      //     .sendMoney(context, receiverController.text, amount);
-                    }
-                  } else {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                          content: Text("Please enter valid details")),
-                    );
-                  }
-                },
-                child: const Text("Send Money", style: TextStyle(fontSize: 16)),
-              ),
-            ],
+                Card(
+                  color: isDarkMode ? Colors.grey[850] : Colors.white,
+                  child: Container(
+                    padding: EdgeInsets.all(12),
+                    child: Column(
+                      children: [
+                        // Receiver Wallet ID Input
+                        TextField(
+                          controller: receiverController,
+                          decoration: InputDecoration(
+                            labelText: "Receiver Wallet ID",
+                            labelStyle: TextStyle(
+                                color:
+                                    isDarkMode ? Colors.white : Colors.black87),
+                            prefixIcon: Icon(
+                              Icons.account_balance_wallet,
+                              color: Colors.blueAccent,
+                              size: 30,
+                            ),
+                            border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(10)),
+                            filled: true,
+                            fillColor:
+                                isDarkMode ? Colors.grey[800] : Colors.white,
+                            contentPadding: EdgeInsets.symmetric(
+                                horizontal: 16, vertical: 20),
+                          ),
+                        ),
+                        const SizedBox(height: 15),
+
+                        // Proceed Button
+                        GestureDetector(
+                          onTap: () {
+                            if (receiverController.text.isNotEmpty) {
+                              PersistentNavBarNavigator.pushNewScreen(
+                                context,
+                                screen: SendMoneyRecieverDetailScreen(
+                                  receiverId: receiverController.text,
+                                ),
+                                withNavBar: false,
+                                pageTransitionAnimation:
+                                    PageTransitionAnimation.cupertino,
+                              );
+                            } else {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                      content:
+                                          Text("Please enter valid details")));
+                            }
+                          },
+                          child: Container(
+                            width: double.infinity,
+                            padding: EdgeInsets.symmetric(vertical: 18),
+                            decoration: BoxDecoration(
+                              color: Colors.blueAccent,
+                              borderRadius: BorderRadius.circular(10),
+                              boxShadow: [
+                                BoxShadow(
+                                    color: Colors.blueAccent.withOpacity(0.2),
+                                    blurRadius: 10,
+                                    offset: Offset(0, 4)),
+                              ],
+                            ),
+                            child: Text("Proceed",
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                    fontSize: 18,
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold)),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                SizedBox(
+                  height: 15,
+                ),
+
+                Card(
+                  color: isDarkMode ? Colors.grey[850] : Colors.white,
+                  child: Container(
+                    padding: EdgeInsets.all(12),
+                    //write somethings about transcation are secured type of stuff
+                  ),
+                )
+              ],
+            ),
           ),
         ),
       ),
