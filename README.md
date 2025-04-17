@@ -1,3 +1,6 @@
-# CBDC [Central Bank Digital Currency] Prototype Application.
+# CBDC [Central Bank Digital Currency]  Application.
 
-# Deployment Url : https://cbdc-app.vercel.app/https://cbdc-app.vercel.app/
+# Deployment Url : https://cbdc-app.vercel.app/
+
+#test user email : testone@gmail.com
+#test user password : testone
