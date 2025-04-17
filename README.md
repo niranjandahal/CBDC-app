@@ -2,6 +2,6 @@
 
 # Deployment Url : https://cbdc-app.vercel.app/
 
-#test user email : testone@gmail.com
+# test user email : "testone@gmail.com"
 
-#test user password : testone
+# test user password : "testone"
