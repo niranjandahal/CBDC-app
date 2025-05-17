@@ -1,38 +1,82 @@
-  import 'package:local_auth/local_auth.dart  ';
-  import 'package:flutter/material.dart';
-  import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter/material.dart';
+import 'package:local_auth/local_auth.dart';
+import 'package:provider/provider.dart';
+import 'package:cbdc/provider/userprovider.dart';
 
-  class Biometricauth {
-    final auth = LocalAuthentication();
+class Biometricauth {
+  final LocalAuthentication auth = LocalAuthentication();
 
-    Future<void> checkBiometric(
-        context, Widget successcreen, Widget failscreen, bool? issetup) async {
-      bool canCheckBiometric = await auth.canCheckBiometrics;
+  /// Main handler for both setup (enable/disable) and usage (login/send money)
+  Future<void> handleBiometricAction({
+    required BuildContext context,
+    required bool isForSetup,
+    required VoidCallback onSuccess,
+    VoidCallback? onFailure,
+  }) async {
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    bool isBiometricEnabled = userProvider.isbiometricenabled;
 
-      if (canCheckBiometric) {
-        List<BiometricType> availableBiometric =
-            await auth.getAvailableBiometrics();
-
-        if (availableBiometric.isNotEmpty) {
-          bool authenticated = await auth.authenticate(
-            localizedReason: "Scan your finger to authenticate",
+    if (isForSetup) {
+      // 👉 Settings mode — toggle biometric
+      if (isBiometricEnabled) {
+        // DISABLE directly, no need to authenticate again
+        await userProvider.setBiometricEnabled(false); // or false
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Biometric Authentication Disabled")),
+        );
+        onSuccess();
+      } else {
+        // ENABLE biometric — ask for fingerprint
+        bool authenticated = await authenticateUser(context);
+        if (authenticated) {
+          await userProvider.setBiometricEnabled(true); // or false
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text("Biometric Authentication Enabled")),
           );
-
-          if (authenticated) {
-            if (issetup == true) {
-              final Future<SharedPreferences> prefs =
-                  SharedPreferences.getInstance();
-              prefs.then((SharedPreferences prefs) {
-                prefs.setBool('isbiometricenabled', true);
-              });
-            }
-            Navigator.push(
-                context, MaterialPageRoute(builder: (context) => successcreen));
-          } else {
-            Navigator.push(
-                context, MaterialPageRoute(builder: (context) => failscreen));
-          }
+          onSuccess();
+        } else {
+          onFailure?.call();
         }
+      }
+    } else {
+      // 👉 Used for login or sending money
+      if (!isBiometricEnabled) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Biometric not enabled in settings")),
+        );
+        onFailure?.call();
+        return;
+      }
+
+      bool authenticated = await authenticateUser(context);
+      if (authenticated) {
+        onSuccess();
+      } else {
+        onFailure?.call();
       }
     }
   }
+
+  /// Just authentication logic
+  Future<bool> authenticateUser(BuildContext context) async {
+    bool canCheckBiometric = await auth.canCheckBiometrics;
+    if (!canCheckBiometric) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Biometric not available")),
+      );
+      return false;
+    }
+
+    bool authenticated = await auth.authenticate(
+      localizedReason: "Authenticate to proceed",
+    );
+
+    if (!authenticated) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Biometric Authentication Failed")),
+      );
+    }
+
+    return authenticated;
+  }
+}

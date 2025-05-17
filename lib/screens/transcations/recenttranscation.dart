@@ -1,6 +1,7 @@
 import 'package:cbdc/screens/transcations/transcatondetail.dart';
 import 'package:cbdc/widgets/transaction_card.dart';
 import 'package:flutter/material.dart';
+import 'package:persistent_bottom_nav_bar/persistent_bottom_nav_bar.dart';
 import 'package:provider/provider.dart';
 import 'package:cbdc/provider/userprovider.dart';
 
@@ -12,17 +13,14 @@ class RecentTranscation extends StatefulWidget {
 }
 
 class _RecentTranscationState extends State<RecentTranscation> {
-  bool isFetched = false; // Flag to check if data has been fetched
+  //call fetch transaction method in init state
 
   @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-
-    if (!isFetched) {
-      final userProvider = Provider.of<UserProvider>(context, listen: false);
-      userProvider.fetchTransactions();
-      isFetched = true; // Mark as fetched
-    }
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Provider.of<UserProvider>(context, listen: false).fetchTransactions();
+    });
   }
 
   @override
@@ -31,40 +29,65 @@ class _RecentTranscationState extends State<RecentTranscation> {
       builder: (context, userProvider, child) {
         final transactions = userProvider.transactions;
         final isLoading = userProvider.isrecenttranscationloading;
+        final currentWalletId = userProvider.walletuserid;
 
-        // Loading indicator
         if (isLoading) {
           return const Center(child: CircularProgressIndicator());
         }
 
-        // No transactions found
         if (transactions.isEmpty) {
           return const Center(child: Text("No transactions found."));
         }
 
-        // List of recent transactions
         return ListView.builder(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
+          // shrinkWrap: true,
           itemCount: transactions.length,
           itemBuilder: (context, index) {
             final transaction = transactions[index];
 
+            final senderId = transaction['sender']['_id'];
+            final receiverId = transaction['receiver']['_id'];
+
+            bool isSender = senderId == currentWalletId;
+            bool isReceiver = receiverId == currentWalletId;
+
+            // Defensive check
+            if (!isSender && !isReceiver) {
+              return const SizedBox(); // skip if not related to current user
+            }
+
+            final isCredit = isReceiver;
+            final arrowIcon =
+                isCredit ? Icons.arrow_downward : Icons.arrow_upward;
+            final arrowColor = isCredit ? Colors.green : Colors.red;
+
+            final otherPartyName = isCredit
+                ? transaction['sender']['name']
+                : transaction['receiver']['name'];
+
+            final title = isCredit
+                ? "fund received from $otherPartyName"
+                : "fund transferred to $otherPartyName";
+
+            final amountPrefix = isCredit ? "+" : "-";
+            final amount = "$amountPrefix Rs ${transaction['amount']}";
+
             return GestureDetector(
               onTap: () {
-                Navigator.push(
+                PersistentNavBarNavigator.pushNewScreen(
                   context,
-                  MaterialPageRoute(
-                    builder: (context) =>
-                        TransactionDetail(transaction: transaction),
-                  ),
+                  screen: TransactionDetail(transaction: transaction),
+                  withNavBar: false,
+                  pageTransitionAnimation: PageTransitionAnimation.cupertino,
                 );
               },
               child: TransactionCard(
-                title: transaction['receiver']['name'],
+                title: title,
                 subtitle: transaction['status'],
-                amount: "-\Rs ${transaction['amount']}",
-                isCredit: transaction['isCredit'],
+                amount: amount,
+                isCredit: isCredit,
+                arrowIcon: arrowIcon,
+                arrowColor: arrowColor,
               ),
             );
           },

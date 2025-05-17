@@ -1,15 +1,15 @@
 import 'package:cbdc/screens/utils/kycverification.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:persistent_bottom_nav_bar/persistent_bottom_nav_bar.dart';
+import 'package:provider/provider.dart';
 import 'package:cbdc/provider/userprovider.dart';
-import 'package:cbdc/screens/auth/login_screen.dart';
 
 class ProfileScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        automaticallyImplyLeading: false,
         title: const Text("Profile"),
         centerTitle: true,
       ),
@@ -17,16 +17,6 @@ class ProfileScreen extends StatelessWidget {
         padding: const EdgeInsets.all(20.0),
         child: Consumer<UserProvider>(
           builder: (context, user, child) {
-            if (user.email.isEmpty || user.fullName.isEmpty) {
-              Future.microtask(() => PersistentNavBarNavigator.pushNewScreen(
-                    context,
-                    screen: LoginScreen(),
-                    withNavBar: false,
-                    pageTransitionAnimation: PageTransitionAnimation.fade,
-                  ));
-              return SizedBox();
-            }
-
             return Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
@@ -84,9 +74,11 @@ class ProfileScreen extends StatelessWidget {
         statusIcon = Icons.warning;
         statusText = "Verify KYC";
         action = () {
-          Navigator.push(
+          PersistentNavBarNavigator.pushNewScreen(
             context,
-            MaterialPageRoute(builder: (context) => KycVerificationScreen()),
+            screen: KycVerificationScreen(),
+            withNavBar: false,
+            pageTransitionAnimation: PageTransitionAnimation.cupertino,
           );
         };
     }

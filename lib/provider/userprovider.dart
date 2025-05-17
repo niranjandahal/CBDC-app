@@ -1,60 +1,134 @@
 import 'dart:convert';
+import 'package:persistent_bottom_nav_bar/persistent_bottom_nav_bar.dart';
 import 'package:cbdc/screens/auth/login_screen.dart';
 import 'package:cbdc/screens/main_navigation.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
-import 'package:persistent_bottom_nav_bar/persistent_bottom_nav_bar.dart';
 import 'dart:async';
 import 'package:http_parser/http_parser.dart';
 
 class UserProvider with ChangeNotifier {
-  // static const String baseUrl = "http://192.168.10.77:5000/api/v1";
-  static const String baseUrl = "https://cbdc-backend.vercel.app/api/v1";
+  static const String baseUrl = "http://192.168.1.3:5000/api/v1";
+  // static const String baseUrl = "http://192.168.211.20:5000/api/v1";
+  // static const String baseUrl = "https://cbdc-backend.vercel.app/api/v1";
 
-  // Timer? _balanceTimer;
-
+//
+//
+//varaibles
+//
+//
   List _transactions = [];
   bool isrecenttranscationloading = false;
   bool showbalance = false;
   String _walletuserid = "";
   String _fullName = "";
   String _email = "";
-  double _balance = -1;
+  double _balance = 0.00;
   // String _userImageurl = "";
   // String _governmentIdImageUrl = "";
   String _dob = "";
   String _citizenidno = "";
-
-  bool _isTransactionInProgress = false;
-
-  bool get isTransactionInProgress => _isTransactionInProgress;
-
-  //kyc
   String _kycStatus = "Pending"; // You can set default as "Pending"
 
+  // bool _isbiometricenabled = false;
+  bool _isTransactionInProgress = false;
+  String? _transactionPin;
+  bool _isBiometricEnabled = false;
+  bool _transactionpin_backend = false;
+  bool get isTransactionInProgress => _isTransactionInProgress;
+  String? get transactionPin => _transactionPin;
+  bool get transactionpin_backend => _transactionpin_backend;
+
+  //kyc
   // 👀 Getters 👀
   String get walletuserid => _walletuserid;
   String get fullName => _fullName;
   String get email => _email;
   double get balance => _balance;
   List<dynamic> get transactions => _transactions;
-
   // String get userImageurl => _userImageurl;
   // String get governmentIdImageUrl => _governmentIdImageUrl;
   String get dob => _dob;
   String get citizenidno => _citizenidno;
   String get baseurl => baseUrl;
-
+  bool get isbiometricenabled => _isBiometricEnabled;
   //kyc
-
   String get kycStatus => _kycStatus;
+
+  //
+  // 👀 Three function for biometric for biometric auth.dart file 👀
+  //
+
+  Future<void> loadBiometricPreference() async {
+    final prefs = await SharedPreferences.getInstance();
+    _isBiometricEnabled = prefs.getBool('isbiometricenabled') ?? false;
+    notifyListeners();
+  }
+
+  Future<void> setBiometricEnabled(bool value) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('isbiometricenabled', value);
+    _isBiometricEnabled = value;
+    notifyListeners();
+  }
+
+//
+//function for login screen
+//
+  Future<void> checkBiometricLoginAvailable() async {
+    final prefs = await SharedPreferences.getInstance();
+    String walletId = prefs.getString('wallet_id') ?? "";
+    bool biometricEnabled = prefs.getBool('isbiometricenabled') ?? false;
+    _isBiometricEnabled = biometricEnabled;
+    _walletuserid = walletId;
+    notifyListeners();
+  }
+
+  //
+  //for setting page
+  //
+
+  Future<String> getBiometricLabel() async {
+    final prefs = await SharedPreferences.getInstance();
+    final isBiometricEnabled = prefs.getBool('isbiometricenabled') ?? false;
+    return isBiometricEnabled ? "Disable Biometric" : "Enable Biometric";
+  }
+
+  Future<String> getTransactionPinLabel() async {
+    final prefs = await SharedPreferences.getInstance();
+    final pin = prefs.getString('transaction_pin');
+    return (pin == null || transactionpin_backend == false)
+        ? "Change Transaction PIN"
+        : "Setup Transaction PIN";
+  }
+
+  // Set transaction PIN
+  Future<void> setTransactionPin(String pin) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('transaction_pin', pin);
+    _transactionPin = pin;
+    notifyListeners();
+  }
+
+  // Get the stored transaction pin
+  Future<void> loadtranscationpin() async {
+    final prefs = await SharedPreferences.getInstance();
+    _transactionPin = prefs.getString('transaction_pin');
+    notifyListeners();
+  }
 
   // 👀 toogle show balance 👀
 
   void toogleShowBalance() {
     showbalance = !showbalance;
+    notifyListeners();
+  }
+
+  void setwalletidfromsharedpreftowalletidvariable(
+      String walletidfromsharedpref) {
+    _walletuserid = walletidfromsharedpref;
     notifyListeners();
   }
 
@@ -65,21 +139,11 @@ class UserProvider with ChangeNotifier {
     await prefs.setString("wallet_id", walletuserid);
   }
 
-  // 👀 Check if User is Logged In 👀
-
-  Future<bool> checkLoginState() async {
-    if (_walletuserid.isNotEmpty) return true;
-
-    final prefs = await SharedPreferences.getInstance();
-    _walletuserid = prefs.getString("wallet_id") ?? "";
-    notifyListeners();
-    return _walletuserid.isNotEmpty;
-  }
-
   // 👀 Register User & update Data 👀
 
   Future<void> registerUser(
       BuildContext context, String name, String email, String password) async {
+    print("register user called");
     final response = await http.post(
       Uri.parse("$baseUrl/user/register"),
       headers: {"Content-Type": "application/json"},
@@ -90,7 +154,10 @@ class UserProvider with ChangeNotifier {
       }),
     );
 
+    print("waiting for reponse body register user post request done");
+
     final responseData = jsonDecode(response.body);
+    print(responseData);
     if (response.statusCode == 201) {
       print(
           "User registered successfully and here is the response data!!!! ............{{{{{}}}}}}}]]]]]]] data :::::::"
@@ -99,12 +166,20 @@ class UserProvider with ChangeNotifier {
       await _savewalletuserid(_walletuserid);
       notifyListeners();
 
-      PersistentNavBarNavigator.pushNewScreen(
+      Navigator.pushAndRemoveUntil(
         context,
-        screen: MainNavigation(),
-        withNavBar: true, // OPTIONAL VALUE. True by default.
-        pageTransitionAnimation: PageTransitionAnimation.cupertino,
+        MaterialPageRoute(
+          builder: (context) => MainNavigation(),
+        ),
+        (route) => false,
       );
+
+      // PersistentNavBarNavigator.pushNewScreen(
+      //   context,
+      //   screen: MainNavigation(),
+      //   pageTransitionAnimation: PageTransitionAnimation.cupertino,
+      //   withNavBar: true,
+      // );
     } else {
       String errorMessage = responseData["message"] ?? "Registration failed";
       print(errorMessage);
@@ -140,13 +215,21 @@ class UserProvider with ChangeNotifier {
 
       notifyListeners();
 
-      // Now navigate to MainNavigation
-      PersistentNavBarNavigator.pushNewScreen(
+      Navigator.pushAndRemoveUntil(
         context,
-        screen: MainNavigation(),
-        withNavBar: true,
-        pageTransitionAnimation: PageTransitionAnimation.cupertino,
+        MaterialPageRoute(
+          builder: (context) => MainNavigation(),
+        ),
+        (route) => false,
       );
+
+      // // Now navigate to MainNavigation
+      // PersistentNavBarNavigator.pushNewScreen(
+      //   context,
+      //   screen: MainNavigation(),
+      //   pageTransitionAnimation: PageTransitionAnimation.cupertino,
+      //   withNavBar: true,
+      // );
     } else {
       String errorMessage =
           jsonDecode(response.body)["message"] ?? "Login failed";
@@ -156,7 +239,7 @@ class UserProvider with ChangeNotifier {
   }
 
 //👀 Function to set transaction PIN 👀
-  Future<void> setTransactionPin(
+  Future<void> setupTransactionPin(
       BuildContext context, String transactionPin) async {
     if (_walletuserid.isEmpty) return;
 
@@ -173,14 +256,27 @@ class UserProvider with ChangeNotifier {
       print("Set PIN API Response: ${response.body}");
 
       if (response.statusCode == 200) {
+        //save pin locally
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString('transaction_pin', transactionPin);
+
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(
+            builder: (context) => MainNavigation(),
+          ),
+          (route) => false,
+        );
+
+        // PersistentNavBarNavigator.pushNewScreen(
+        //   context,
+        //   screen: MainNavigation(),
+        //   pageTransitionAnimation: PageTransitionAnimation.cupertino,
+        //   withNavBar: false,
+        // );
+
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text("Transaction PIN set successfully!")),
-        );
-        PersistentNavBarNavigator.pushNewScreen(
-          context,
-          screen: MainNavigation(),
-          withNavBar: false, // OPTIONAL VALUE. True by default.
-          pageTransitionAnimation: PageTransitionAnimation.cupertino,
         );
       } else {
         print("Failed to set PIN: ${response.body}");
@@ -304,7 +400,7 @@ class UserProvider with ChangeNotifier {
       _fullName = data['name'] ?? "";
     }
 
-    if (_balance == -1) {
+    if (_balance == 0.00) {
       // Assuming -1 is an invalid balance
       _balance = (data['balance'] ?? 0).toDouble();
     }
@@ -312,6 +408,8 @@ class UserProvider with ChangeNotifier {
     if (_email.isEmpty) {
       _email = data['email'] ?? "";
     }
+
+    _balance = (data['balance'] ?? 0).toDouble();
 
     _kycStatus = data['kycStatus'] ?? "Pending";
     _dob = data['dateOfBirth'] ?? "";
@@ -332,8 +430,14 @@ class UserProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> sendMoney(BuildContext context, String receiverId, double amount,
-      String pin) async {
+  Future<void> sendMoney(
+    BuildContext context,
+    String receiverId,
+    double amount,
+    String pin,
+    String TranscationType,
+    String Remarks,
+  ) async {
     print(pin);
     if (_walletuserid.isEmpty) return;
 
@@ -357,34 +461,42 @@ class UserProvider with ChangeNotifier {
           "amount": amount,
           "transactionPin": pin,
           "transactionType": "transfer",
-          "description": "Money transfer",
+          "description": Remarks,
         }),
       );
 
       print(response.body);
 
       if (response.statusCode == 201) {
-        final data = jsonDecode(response.body);
-        _balance = (data['user']['balance'] ?? -1).toDouble();
-        notifyListeners();
+        // final data = jsonDecode(response.body);
+        getBalance();
+        // _balance = (data['user']['balance'] ?? -1).toDouble();
+        // notifyListeners();
 
         // Navigate first, then show success message
         if (context.mounted) {
-          Navigator.of(context).pushAndRemoveUntil(
-            MaterialPageRoute(builder: (context) => MainNavigation()),
+          // PersistentNavBarNavigator.pushNewScreen(
+          //   context,
+          //   screen: MainNavigation(),
+          //   pageTransitionAnimation: PageTransitionAnimation.cupertino,
+          //   withNavBar: true,
+          // );
+
+          Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(
+              builder: (context) => MainNavigation(),
+            ),
             (route) => false,
           );
 
-          // Show success message after navigation
-          Future.microtask(() {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text("Transaction Successful")),
-            );
-          });
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text("Transaction Successful")),
+          );
         }
       } else {
         final errorMessage =
-            jsonDecode(response.body)['message'] ?? "Transaction failed";
+            jsonDecode(response.body)['msg'] ?? "Transaction failed";
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text(errorMessage)),
@@ -478,6 +590,13 @@ class UserProvider with ChangeNotifier {
         );
         _kycStatus = "Submitted";
         notifyListeners();
+        //once kyc updated call fetch user info to get latest user data
+        fetchUserInfo();
+        //navigate to main navigation
+        PersistentNavBarNavigator.pushNewScreen(context,
+            screen: MainNavigation(),
+            pageTransitionAnimation: PageTransitionAnimation.cupertino,
+            withNavBar: true);
       } else {
         String errorMessage =
             jsonDecode(responseBody)['message'] ?? "KYC submission failed";
@@ -539,28 +658,19 @@ class UserProvider with ChangeNotifier {
   Future<void> logout(BuildContext context) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove("wallet_id");
-    await prefs.setBool('isloggedin', false);
     await prefs.setBool('isbiometricenabled', false);
 
-    _walletuserid = "";
-    _fullName = "";
-    _email = "";
-    _balance = -1;
-    _transactions = [];
-    // _userImageurl = "";
-    // _governmentIdImageUrl = "";
-    _dob = "";
-    _citizenidno = "";
+    print("SharedPreferences cleared");
 
-    notifyListeners();
+    //5second delay before navigating to login screen
 
-    // Close the keyboard before navigating
-    FocusScope.of(context).unfocus();
-
-    // Navigate to login screen, clearing the stack
-    Navigator.of(context).pushAndRemoveUntil(
-      MaterialPageRoute(builder: (context) => LoginScreen()),
-      (route) => false,
-    );
+    await Future.delayed(const Duration(seconds: 1), () {
+      PersistentNavBarNavigator.pushNewScreen(
+        context,
+        screen: LoginScreen(),
+        pageTransitionAnimation: PageTransitionAnimation.cupertino,
+        withNavBar: false,
+      );
+    });
   }
 }

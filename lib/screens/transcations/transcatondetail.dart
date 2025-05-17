@@ -22,6 +22,7 @@ class TransactionDetail extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
+        automaticallyImplyLeading: false,
         title: const Text("Transaction Details"),
         centerTitle: true,
         backgroundColor: isDarkMode ? Colors.black : Colors.deepPurple,

@@ -1,5 +1,5 @@
-import 'package:cbdc/authentication/auth.dart';
 import 'package:cbdc/provider/userprovider.dart';
+import 'package:cbdc/screens/auth/login_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:cbdc/provider/theme_provider.dart';
@@ -33,7 +33,7 @@ class CBDCApp extends StatelessWidget {
             theme: themeProvider.isDarkMode
                 ? AppTheme.darkTheme
                 : AppTheme.lightTheme,
-            home: const AuthHandler(),
+            home: LoginScreen(),
           );
         },
       ),
@@ -99,54 +99,51 @@ class ForcedMobileView extends StatelessWidget {
   }
 }
 
+//
+//
+//
+// latest code with device preview wrapper for testing purpose only
+//
+//
+//
 
-
-
-
-//latest code with device preview wrapper for testing purpose only 
-
-
-
-
-// import 'package:cbdc/authentication/auth.dart';
-// import 'package:cbdc/provider/theme_provider.dart';
 // import 'package:cbdc/provider/userprovider.dart';
-// import 'package:device_preview/device_preview.dart';
+// import 'package:cbdc/screens/auth/login_screen.dart';
 // import 'package:flutter/material.dart';
 // import 'package:provider/provider.dart';
+// import 'package:cbdc/provider/theme_provider.dart';
+// import 'package:cbdc/themes/app_theme.dart';
+// import 'package:device_preview/device_preview.dart';
 
-// void main() {
-//   runApp(MyAppWrapper());
-// }
-
-// class MyAppWrapper extends StatelessWidget {
-//   @override
-//   Widget build(BuildContext context) {
-//     return MultiProvider(
+// void main() async {
+//   WidgetsFlutterBinding.ensureInitialized();
+//   runApp(
+//     MultiProvider(
 //       providers: [
 //         ChangeNotifierProvider(create: (context) => ThemeProvider()),
 //         ChangeNotifierProvider(create: (context) => UserProvider()),
 //       ],
-//       child: MyApp(),
-//     );
-//   }
+//       child: DevicePreview(
+//         enabled: true, // ✅ Set to false if you want to disable in production
+//         builder: (context) => CBDCApp(),
+//       ),
+//     ),
+//   );
 // }
 
-// class MyApp extends StatelessWidget {
+// class CBDCApp extends StatelessWidget {
 //   @override
 //   Widget build(BuildContext context) {
-//     return DevicePreview(
-//       enabled: true,
-//       builder: (context) => MaterialApp(
-//         useInheritedMediaQuery: true,
-//         locale: DevicePreview.locale(context),
-//         builder: (context, child) {
-//           return DevicePreview.appBuilder(context, child);
-//         },
-//         theme: ThemeData.light(),
-//         darkTheme: ThemeData.dark(),
-//         home: const AuthHandler(),
-//       ),
+//     final themeProvider = Provider.of<ThemeProvider>(context);
+//     return MaterialApp(
+//       debugShowCheckedModeBanner: false,
+//       title: 'CBDC App',
+//       builder: DevicePreview.appBuilder, // ✅ important line!
+//       useInheritedMediaQuery: true, // ✅ important line!
+//       locale: DevicePreview.locale(context), // ✅ important line!
+//       theme:
+//           themeProvider.isDarkMode ? AppTheme.darkTheme : AppTheme.lightTheme,
+//       home: LoginScreen(),
 //     );
 //   }
 // }

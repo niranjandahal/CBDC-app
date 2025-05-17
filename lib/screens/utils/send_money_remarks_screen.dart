@@ -1,8 +1,8 @@
 //remarks page for user screen
-import 'package:cbdc/provider/userprovider.dart';
 import 'package:cbdc/screens/transcations/transcationpinCheck.dart';
+import 'package:cbdc/widgets/showorhidebalancecard.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:persistent_bottom_nav_bar/persistent_bottom_nav_bar.dart';
 
 class sendmoneyremarksscreen extends StatefulWidget {
   final String receiverId;
@@ -29,124 +29,75 @@ class _sendmoneyremarksscreenState extends State<sendmoneyremarksscreen> {
 
     return Scaffold(
       appBar: AppBar(
+        automaticallyImplyLeading: false,
         title: const Text(
-          "Transaction Details",
+          "Conirm transaction",
           style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
         ),
-        backgroundColor: isDarkMode ? Colors.black : Colors.blueAccent,
+        backgroundColor: isDarkMode ? Color(0xFF121212) : Colors.blueAccent,
         elevation: 0,
       ),
-      body: Consumer<UserProvider>(
-        builder: (context, value, child) => Padding(
-          padding: const EdgeInsets.all(12.0),
+      body: Padding(
+        padding: const EdgeInsets.all(12.0),
+        child: SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Balance Card
-              Card(
-                elevation: 10,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                color: isDarkMode ? Colors.grey[850] : Colors.white,
-                child: Padding(
-                  padding: const EdgeInsets.all(10.0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Row(
-                        children: [
-                          Icon(Icons.account_balance_wallet,
-                              color: isDarkMode ? Colors.white : Colors.black),
-                          const SizedBox(width: 10),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              value.showbalance
-                                  ? Text(
-                                      "NPR\$${value.balance.toStringAsFixed(2)}",
-                                      style: TextStyle(
-                                          fontSize: 18,
-                                          fontWeight: FontWeight.bold,
-                                          color: isDarkMode
-                                              ? Colors.white
-                                              : Colors.black),
-                                    )
-                                  : Text(
-                                      "NPR****",
-                                      style: TextStyle(
-                                          fontSize: 18,
-                                          fontWeight: FontWeight.bold,
-                                          color: isDarkMode
-                                              ? Colors.white
-                                              : Colors.black),
-                                    ),
-                              Text("Balance",
-                                  style: TextStyle(
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.bold,
-                                      color: isDarkMode
-                                          ? Colors.white
-                                          : Colors.black)),
-                            ],
-                          ),
-                        ],
-                      ),
-                      IconButton(
-                        onPressed: () {
-                          value.toogleShowBalance();
-                        },
-                        icon: Icon(
-                            value.showbalance
-                                ? Icons.visibility
-                                : Icons.visibility_off,
-                            color: isDarkMode ? Colors.white : Colors.black),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
+              ShowOrHideBalanceCard(),
 
               const SizedBox(height: 10),
 
               // Receiver Info Card
+              // Receiver Info Card
               Card(
-                elevation: 10,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10),
                 ),
-                color: isDarkMode ? Colors.grey[850] : Colors.white,
+                color: isDarkMode ? Color(0xFF1E1E1E) : Colors.white,
                 child: Padding(
                   padding: const EdgeInsets.all(10.0),
                   child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            "To: ${widget.receiverId}",
-                            style: TextStyle(
-                                fontSize: 18,
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              "To: personname***",
+                              style: TextStyle(
+                                fontSize: 14,
                                 fontWeight: FontWeight.bold,
-                                color:
-                                    isDarkMode ? Colors.white : Colors.black),
-                          ),
-                          Text(
-                            "ID: ${widget.receiverId}",
-                            style: TextStyle(
-                                fontSize: 16,
-                                color:
-                                    isDarkMode ? Colors.white70 : Colors.black),
-                          ),
-                        ],
+                                color: isDarkMode
+                                    ? Color(0xFFE0E0E0)
+                                    : Colors.black,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                              maxLines: 1,
+                            ),
+                            const SizedBox(height: 5),
+                            Text(
+                              " ${widget.receiverId}",
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: isDarkMode
+                                    ? Color(0xFFE0E0E0)
+                                    : Colors.black,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                              maxLines: 1,
+                            ),
+                          ],
+                        ),
                       ),
                       Text(
-                        "NPR\$${widget.amount.toStringAsFixed(2)}",
+                        "NPR ${widget.amount.toStringAsFixed(2)}",
                         style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: isDarkMode ? Colors.green : Colors.green),
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: isDarkMode ? Colors.green : Colors.green,
+                        ),
                       ),
                     ],
                   ),
@@ -157,11 +108,10 @@ class _sendmoneyremarksscreenState extends State<sendmoneyremarksscreen> {
 
               // Purpose Selection Grid
               Card(
-                elevation: 10,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10),
                 ),
-                color: isDarkMode ? Colors.grey[850] : Colors.white,
+                color: isDarkMode ? Color(0xFF1E1E1E) : Colors.white,
                 child: Padding(
                   padding: const EdgeInsets.all(10.0),
                   child: Column(
@@ -172,7 +122,8 @@ class _sendmoneyremarksscreenState extends State<sendmoneyremarksscreen> {
                         style: TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
-                            color: isDarkMode ? Colors.white : Colors.black),
+                            color:
+                                isDarkMode ? Color(0xFFE0E0E0) : Colors.black),
                       ),
                       const SizedBox(height: 10),
                       GridView.builder(
@@ -199,14 +150,13 @@ class _sendmoneyremarksscreenState extends State<sendmoneyremarksscreen> {
                                 color: selectedPurpose == purpose
                                     ? Colors.blueAccent
                                     : isDarkMode
-                                        ? Colors.grey[800]
+                                        ? const Color.fromARGB(113, 66, 66, 66)
                                         : Colors.white,
                                 borderRadius: BorderRadius.circular(8),
                                 border: Border.all(
-                                  color: selectedPurpose == purpose
-                                      ? Colors.blueAccent
-                                      : Colors.grey,
-                                ),
+                                    color: selectedPurpose == purpose
+                                        ? Colors.blueAccent
+                                        : Color(0xFF2C2C2C)),
                               ),
                               child: Text(
                                 purpose,
@@ -216,7 +166,7 @@ class _sendmoneyremarksscreenState extends State<sendmoneyremarksscreen> {
                                   color: selectedPurpose == purpose
                                       ? Colors.white
                                       : isDarkMode
-                                          ? Colors.white
+                                          ? Color(0xFFE0E0E0)
                                           : Colors.black,
                                 ),
                               ),
@@ -233,11 +183,10 @@ class _sendmoneyremarksscreenState extends State<sendmoneyremarksscreen> {
 
               // Remarks TextField
               Card(
-                elevation: 10,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10),
                 ),
-                color: isDarkMode ? Colors.grey[850] : Colors.white,
+                color: isDarkMode ? Color(0xFF1E1E1E) : Colors.white,
                 child: Padding(
                   padding: const EdgeInsets.all(10.0),
                   child: Column(
@@ -248,7 +197,8 @@ class _sendmoneyremarksscreenState extends State<sendmoneyremarksscreen> {
                         style: TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
-                            color: isDarkMode ? Colors.white : Colors.black),
+                            color:
+                                isDarkMode ? Color(0xFFE0E0E0) : Colors.black),
                       ),
                       const SizedBox(height: 10),
                       TextField(
@@ -276,14 +226,17 @@ class _sendmoneyremarksscreenState extends State<sendmoneyremarksscreen> {
                       shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(10))),
                   onPressed: () {
-                    Navigator.push(
+                    PersistentNavBarNavigator.pushNewScreen(
                       context,
-                      MaterialPageRoute(
-                        builder: (context) => TransactionPin(
-                          receiverId: widget.receiverId,
-                          amount: widget.amount,
-                        ),
+                      screen: TransactionPin(
+                        receiverId: widget.receiverId,
+                        amount: widget.amount,
+                        Remarks: remarksController.text,
+                        TranscationType: selectedPurpose,
                       ),
+                      withNavBar: false,
+                      pageTransitionAnimation:
+                          PageTransitionAnimation.cupertino,
                     );
                   },
                   child: Text(

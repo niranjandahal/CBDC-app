@@ -1,9 +1,9 @@
 import 'package:cbdc/provider/userprovider.dart';
 import 'package:cbdc/screens/auth/login_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:persistent_bottom_nav_bar/persistent_bottom_nav_bar.dart';
 import 'package:provider/provider.dart';
 import 'package:cbdc/provider/theme_provider.dart';
-import 'package:persistent_bottom_nav_bar/persistent_bottom_nav_bar.dart';
 
 class SignupScreen extends StatefulWidget {
   @override
@@ -93,7 +93,10 @@ class _SignupScreenState extends State<SignupScreen> {
                       Colors.black,
                       Colors.grey[900]!,
                     ] // 👀 Apply dark gradient
-                  : [Colors.white, Colors.white], // 👀 Keep white for light mode
+                  : [
+                      Colors.white,
+                      Colors.white
+                    ], // 👀 Keep white for light mode
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),

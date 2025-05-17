@@ -16,14 +16,16 @@ class _SetupTransactionPinState extends State<SetupTransactionPin> {
   void _submitPin() {
     if (_formKey.currentState!.validate()) {
       final userProvider = Provider.of<UserProvider>(context, listen: false);
-      userProvider.setTransactionPin(context, _pinController.text);
+      userProvider.setupTransactionPin(context, _pinController.text);
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Set Transaction PIN")),
+      appBar: AppBar(
+        automaticallyImplyLeading: false,
+        title: const Text("Set Transaction PIN")),
       body: Padding(
         padding: const EdgeInsets.all(20.0),
         child: Form(

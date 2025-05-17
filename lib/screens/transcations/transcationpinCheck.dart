@@ -1,18 +1,21 @@
 import 'package:cbdc/screens/auth/biometric_auth.dart';
-import 'package:cbdc/screens/transcations/transcatoinsucces.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:pinput/pinput.dart';
 import 'package:cbdc/provider/userprovider.dart';
-import 'package:local_auth/local_auth.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class TransactionPin extends StatefulWidget {
   final String receiverId;
   final double amount;
+  final String TranscationType;
+  final String Remarks;
 
-  const TransactionPin(
-      {super.key, required this.receiverId, required this.amount});
+  TransactionPin(
+      {super.key,
+      required this.receiverId,
+      required this.amount,
+      required this.TranscationType,
+      required this.Remarks});
 
   @override
   State<TransactionPin> createState() => _TransactionPinState();
@@ -20,24 +23,67 @@ class TransactionPin extends StatefulWidget {
 
 class _TransactionPinState extends State<TransactionPin> {
   final TextEditingController _pinController = TextEditingController();
-  final Biometricauth _biometricauth = Biometricauth();
+  bool _hasShownBiometricPopup = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _initializeBiometric();
+  }
+
+  Future<void> _initializeBiometric() async {
+    // Use UserProvider to get biometric status
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    await userProvider.loadBiometricPreference();
+    await userProvider.loadtranscationpin();
+
+    // Trigger biometric authentication if enabled
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (userProvider.isbiometricenabled && !_hasShownBiometricPopup) {
+        _hasShownBiometricPopup = true;
+        _authenticateAndSend(userProvider);
+      }
+    });
+  }
+
+  Future<void> _authenticateAndSend(UserProvider userProvider) async {
+    await Biometricauth().handleBiometricAction(
+      context: context,
+      isForSetup: false, // Not enabling/disabling, just authenticating
+      onSuccess: () {
+        String? savedPin = userProvider.transactionPin;
+        if (savedPin != null && savedPin.length == 4) {
+          _sendWithPin(savedPin);
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text("Saved PIN not found.")),
+          );
+        }
+      },
+      onFailure: () {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Authentication cancelled")),
+        );
+      },
+    );
+  }
+
+  void _sendWithPin(String pin) {
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    userProvider.sendMoney(
+      context,
+      widget.receiverId,
+      widget.amount,
+      pin,
+      widget.TranscationType,
+      widget.Remarks,
+    );
+  }
 
   @override
   void dispose() {
     _pinController.dispose();
     super.dispose();
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    // Check biometric on page load
-    _biometricauth.checkBiometric(
-      context,
-      TranscationSucess(), // Success screen
-      const TransactionPin(receiverId: "", amount: 0.0), // Failure screen
-      false, // Assuming biometric setup status is false (you can update it accordingly)
-    );
   }
 
   @override
@@ -58,7 +104,6 @@ class _TransactionPinState extends State<TransactionPin> {
         padding: const EdgeInsets.all(20.0),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Text(
               "Enter your 4-digit PIN",
@@ -99,20 +144,7 @@ class _TransactionPinState extends State<TransactionPin> {
               child: ElevatedButton(
                 onPressed: userProvider.isTransactionInProgress
                     ? null
-                    : () {
-                        if (_pinController.text.length != 4) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                                content:
-                                    Text("Please enter a valid 4-digit PIN")),
-                          );
-                          return;
-                        }
-
-                        // Call sendMoney and let it handle navigation
-                        userProvider.sendMoney(context, widget.receiverId,
-                            widget.amount, _pinController.text);
-                      },
+                    : () => _sendWithPin(_pinController.text),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: isDarkMode ? Colors.blueAccent : Colors.blue,
                   shape: RoundedRectangleBorder(
@@ -124,6 +156,71 @@ class _TransactionPinState extends State<TransactionPin> {
                     : const Text("Confirm", style: TextStyle(fontSize: 16)),
               ),
             ),
+            Selector<UserProvider, bool>(
+              selector: (_, provider) => provider.isbiometricenabled,
+              builder: (context, isEnabled, child) {
+                if (!isEnabled) return SizedBox.shrink();
+                return Column(
+                  children: [
+                    const SizedBox(height: 10),
+                    GestureDetector(
+                      onTap: () async {
+                        print("calling fingerprint");
+                        final userProvider =
+                            Provider.of<UserProvider>(context, listen: false);
+                        await _authenticateAndSend(userProvider);
+                      },
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.fingerprint,
+                            color: isDarkMode ? Colors.white : Colors.black,
+                          ),
+                          const SizedBox(width: 10),
+                          Text(
+                            "Use Biometric Authentication",
+                            style: TextStyle(
+                              color: Colors.grey,
+                              fontStyle: FontStyle.italic,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                );
+              },
+            ),
+
+            // if (_isBiometricEnabled) ...[
+            //   const SizedBox(height: 10),
+            //   GestureDetector(
+            //     onTap: () async {
+            //       print("calling fingerprint");
+            //       await _authenticateAndSend(userProvider);
+            //     },
+            //     child: Row(
+            //       mainAxisAlignment: MainAxisAlignment.center,
+            //       crossAxisAlignment: CrossAxisAlignment.center,
+            //       children: [
+            //         Icon(
+            //           Icons.fingerprint,
+            //           color: isDarkMode ? Colors.white : Colors.black,
+            //         ),
+            //         const SizedBox(width: 10),
+            //         Text(
+            //           "Use Biometric Authentication",
+            //           style: TextStyle(
+            //             color: Colors.grey,
+            //             fontStyle: FontStyle.italic,
+            //           ),
+            //         ),
+            //       ],
+            //     ),
+            //   ),
+            // ],
           ],
         ),
       ),

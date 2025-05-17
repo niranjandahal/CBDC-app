@@ -51,6 +51,7 @@ class _KycVerificationScreenState extends State<KycVerificationScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        automaticallyImplyLeading: false,
         title: const Text("KYC Verification"),
         centerTitle: true,
       ),

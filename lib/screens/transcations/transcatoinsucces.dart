@@ -11,7 +11,9 @@ class _TranscationSucessState extends State<TranscationSucess> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Transcation Success")),
+      appBar: AppBar(
+        automaticallyImplyLeading: false,
+        title: const Text("Transcation Success")),
       body: const Center(
         child: Text("Transcation was successful"),
       ),

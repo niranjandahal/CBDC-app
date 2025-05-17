@@ -1,14 +1,13 @@
 import 'package:cbdc/provider/userprovider.dart';
-import 'package:cbdc/screens/auth/login_screen.dart';
 import 'package:cbdc/screens/navbarmenu/notifications_screen.dart';
 import 'package:flutter/material.dart';
-import "package:persistent_bottom_nav_bar/persistent_bottom_nav_bar.dart";
 import 'navbarmenu/dashboard_screen.dart';
 import 'navbarmenu/transaction_history_screen.dart';
 import 'navbarmenu/settings_screen.dart';
 import 'utils/qrscan_page.dart';
 import 'package:provider/provider.dart';
 import 'package:cbdc/provider/theme_provider.dart';
+import 'package:persistent_bottom_nav_bar/persistent_bottom_nav_bar.dart';
 
 class MainNavigation extends StatefulWidget {
   @override
@@ -27,9 +26,9 @@ class _MainNavigationState extends State<MainNavigation> {
     print(
         "IIIIIIIIIIIIIINNNNNNNNNNNIIIIIIITTTT SSSSTTTAAAAAAATTTTTTTEEE CCCCCAAAAALLLLLLLLLEEEEEEEDD");
     final userProvider = Provider.of<UserProvider>(context, listen: false);
-
+//
     // Fetch user info if walletuserid is available
-
+//
     print("PPPrrrINting WAllet user id before man nva is loaded : ::::::::");
     print(userProvider.walletuserid);
     print("si there wallet id");
@@ -50,16 +49,6 @@ class _MainNavigationState extends State<MainNavigation> {
     final isDarkMode = themeProvider.isDarkMode;
     return Consumer<UserProvider>(
       builder: (context, value, child) {
-        if (value.walletuserid.isEmpty) {
-          Future.microtask(() => PersistentNavBarNavigator.pushNewScreen(
-                context,
-                screen: LoginScreen(),
-                withNavBar: false,
-                pageTransitionAnimation: PageTransitionAnimation.cupertino,
-              ));
-          return SizedBox(); // Prevents UI errkrors while navigating
-        }
-
         return Container(
           decoration: BoxDecoration(
             gradient: LinearGradient(
@@ -125,6 +114,12 @@ class _MainNavigationState extends State<MainNavigation> {
         title: "Dashboard",
         activeColorPrimary: isDarkMode ? Colors.deepPurpleAccent : Colors.blue,
         inactiveColorPrimary: isDarkMode ? Colors.white54 : Colors.grey,
+        routeAndNavigatorSettings: RouteAndNavigatorSettings(
+          initialRoute: '/',
+          routes: {
+            '/': (context) => DashboardScreen(),
+          },
+        ),
       ),
       PersistentBottomNavBarItem(
         icon: Icon(Icons.history,
@@ -132,6 +127,12 @@ class _MainNavigationState extends State<MainNavigation> {
         title: "History",
         activeColorPrimary: isDarkMode ? Colors.deepPurpleAccent : Colors.blue,
         inactiveColorPrimary: isDarkMode ? Colors.white54 : Colors.grey,
+        routeAndNavigatorSettings: RouteAndNavigatorSettings(
+          initialRoute: '/',
+          routes: {
+            '/': (context) => TransactionHistoryScreen(),
+          },
+        ),
       ),
       PersistentBottomNavBarItem(
         icon: Icon(Icons.qr_code_scanner,
@@ -141,6 +142,12 @@ class _MainNavigationState extends State<MainNavigation> {
             ? Colors.greenAccent.withOpacity(0.2)
             : Colors.green.withOpacity(0.2),
         inactiveColorPrimary: Colors.transparent,
+        routeAndNavigatorSettings: RouteAndNavigatorSettings(
+          initialRoute: '/',
+          routes: {
+            '/': (context) => QRScanPage(),
+          },
+        ),
       ),
       PersistentBottomNavBarItem(
         icon: Icon(Icons.notification_important,
@@ -148,6 +155,12 @@ class _MainNavigationState extends State<MainNavigation> {
         title: "Notification",
         activeColorPrimary: isDarkMode ? Colors.deepPurpleAccent : Colors.blue,
         inactiveColorPrimary: isDarkMode ? Colors.white54 : Colors.grey,
+        routeAndNavigatorSettings: RouteAndNavigatorSettings(
+          initialRoute: '/',
+          routes: {
+            '/': (context) => NotificationsScreen(),
+          },
+        ),
       ),
       PersistentBottomNavBarItem(
         icon: Icon(Icons.settings,
@@ -155,6 +168,12 @@ class _MainNavigationState extends State<MainNavigation> {
         title: "Settings",
         activeColorPrimary: isDarkMode ? Colors.deepPurpleAccent : Colors.blue,
         inactiveColorPrimary: isDarkMode ? Colors.white54 : Colors.grey,
+        routeAndNavigatorSettings: RouteAndNavigatorSettings(
+          initialRoute: '/',
+          routes: {
+            '/': (context) => SettingsScreen(),
+          },
+        ),
       ),
     ];
   }

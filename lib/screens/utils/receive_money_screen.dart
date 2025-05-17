@@ -12,6 +12,7 @@ class ReceiveMoneyScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
+        automaticallyImplyLeading: false,
         title: const Text("Receive Money"),
       ),
       body: Consumer<UserProvider>(

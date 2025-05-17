@@ -1,13 +1,12 @@
 import 'package:cbdc/provider/theme_provider.dart';
 import 'package:cbdc/screens/transcations/recenttranscation.dart';
-// import 'package:cbdc/widgets/transaction_card.dart';
 import 'package:flutter/material.dart';
+import 'package:persistent_bottom_nav_bar/persistent_bottom_nav_bar.dart';
 import '../../widgets/balance_card.dart';
 import '../utils/send_money_screen.dart';
 import '../utils/receive_money_screen.dart';
 import '../utils/profile_screen.dart';
 import 'package:provider/provider.dart';
-import 'package:persistent_bottom_nav_bar/persistent_bottom_nav_bar.dart';
 
 class DashboardScreen extends StatelessWidget {
   @override
@@ -16,17 +15,35 @@ class DashboardScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: themeProvider.isDarkMode ? Colors.black : Colors.white,
         automaticallyImplyLeading: false,
-        title: const Text("CBDC Wallet"),
+        title: Text("CBDC Wallet",
+            style: TextStyle(
+              color: themeProvider.isDarkMode ? Colors.white : Colors.black54,
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+            )),
         actions: [
           // Dark Mode Toggle
-          IconButton(
-            icon: Icon(
-                themeProvider.isDarkMode ? Icons.dark_mode : Icons.light_mode),
-            onPressed: () {
-              themeProvider.toggleTheme();
-            },
-          ),
+          themeProvider.isDarkMode
+              ? IconButton(
+                  icon: const Icon(
+                    Icons.light_mode,
+                    color: Colors.white,
+                  ),
+                  onPressed: () {
+                    themeProvider.toggleTheme();
+                  },
+                )
+              : IconButton(
+                  icon: const Icon(
+                    Icons.dark_mode,
+                    color: Colors.black87,
+                  ),
+                  onPressed: () {
+                    themeProvider.toggleTheme();
+                  },
+                ),
         ],
       ),
       body: SingleChildScrollView(
@@ -85,15 +102,20 @@ class DashboardScreen extends StatelessWidget {
               ),
               const SizedBox(height: 30),
               // Recent Transactions
-              const Text(
+              Text(
                 "Recent Transactions",
                 style: TextStyle(
+                  color:
+                      themeProvider.isDarkMode ? Colors.white : Colors.black54,
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
                 ),
               ),
               const SizedBox(height: 10),
-              RecentTranscation(),
+              Container(
+                height: 300,
+                
+                child: RecentTranscation()),
             ],
           ),
         ),
