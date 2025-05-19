@@ -162,21 +162,21 @@ class _SettingsScreenState extends State<SettingsScreen> {
               onTap: () => _logout(context),
             ),
 
-            ListTile(
-              leading: const Icon(Icons.delete, color: Colors.redAccent),
-              title: const Text(
-                "logintestbiometric",
-                style: TextStyle(color: Colors.redAccent),
-              ),
-              onTap: () {
-                PersistentNavBarNavigator.pushNewScreen(
-                  context,
-                  screen: LoginScreen(),
-                  withNavBar: false,
-                  pageTransitionAnimation: PageTransitionAnimation.cupertino,
-                );
-              },
-            ),
+            // ListTile(
+            //   leading: const Icon(Icons.delete, color: Colors.redAccent),
+            //   title: const Text(
+            //     "logintestbiometric",
+            //     style: TextStyle(color: Colors.redAccent),
+            //   ),
+            //   onTap: () {
+            //     PersistentNavBarNavigator.pushNewScreen(
+            //       context,
+            //       screen: LoginScreen(),
+            //       withNavBar: false,
+            //       pageTransitionAnimation: PageTransitionAnimation.cupertino,
+            //     );
+            //   },
+            // ),
           ],
         ),
       ),

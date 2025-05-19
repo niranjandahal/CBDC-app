@@ -45,8 +45,8 @@ class _RecentTranscationState extends State<RecentTranscation> {
           itemBuilder: (context, index) {
             final transaction = transactions[index];
 
-            final senderId = transaction['sender']['_id'];
-            final receiverId = transaction['receiver']['_id'];
+            final senderId = transaction['senderId'];
+            final receiverId = transaction['receiverId'];
 
             bool isSender = senderId == currentWalletId;
             bool isReceiver = receiverId == currentWalletId;
@@ -62,8 +62,8 @@ class _RecentTranscationState extends State<RecentTranscation> {
             final arrowColor = isCredit ? Colors.green : Colors.red;
 
             final otherPartyName = isCredit
-                ? transaction['sender']['name']
-                : transaction['receiver']['name'];
+                ? transaction['senderName']
+                : transaction['receiverName'];
 
             final title = isCredit
                 ? "fund received from $otherPartyName"

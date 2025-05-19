@@ -10,7 +10,9 @@ import 'dart:async';
 import 'package:http_parser/http_parser.dart';
 
 class UserProvider with ChangeNotifier {
-  static const String baseUrl = "http://192.168.1.3:5000/api/v1";
+  static const String baseUrl = "http://192.168.1.7:5000/api/v1";
+
+  // static const String baseUrl = "http://192.168.1.3:5000/api/v1";
   // static const String baseUrl = "http://192.168.211.20:5000/api/v1";
   // static const String baseUrl = "https://cbdc-backend.vercel.app/api/v1";
 
@@ -19,6 +21,7 @@ class UserProvider with ChangeNotifier {
 //varaibles
 //
 //
+
   List _transactions = [];
   bool isrecenttranscationloading = false;
   bool showbalance = false;
@@ -198,6 +201,7 @@ class UserProvider with ChangeNotifier {
       body: jsonEncode({
         "email": email,
         "password": password,
+        "type": "user",
       }),
     );
 
@@ -340,20 +344,26 @@ class UserProvider with ChangeNotifier {
 
     try {
       final response = await http.get(
-        Uri.parse("$baseUrl/transactions/$_walletuserid"),
+        Uri.parse("$baseUrl/transactions/user/$_walletuserid"),
         headers: {"Content-Type": "application/json"},
       );
 
       if (response.statusCode == 200) {
         print("fetchTransaction response incoming:");
+        print(response.body);
 
         List<dynamic> transactions = jsonDecode(response.body)['transactions'];
 
         _transactions = transactions.map((transaction) {
-          bool isCredit = transaction['sender']['_id'] == _walletuserid;
+          // Use entityId instead of _id, and details.name instead of name
+          bool isCredit = transaction['receiver']['entityId'] == _walletuserid;
           return {
             ...transaction,
             'isCredit': isCredit,
+            'senderId': transaction['sender']['entityId'],
+            'receiverId': transaction['receiver']['entityId'],
+            'senderName': transaction['sender']['details']['name'],
+            'receiverName': transaction['receiver']['details']['name'],
           };
         }).toList();
       } else {

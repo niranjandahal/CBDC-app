@@ -17,16 +17,15 @@ class ProfileScreen extends StatelessWidget {
         padding: const EdgeInsets.all(20.0),
         child: Consumer<UserProvider>(
           builder: (context, user, child) {
+            final kyc = user.kycStatus.trim().toLowerCase();
             return Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                user.kycStatus == "not_submitted"
-                    ? Container()
-                    : _buildProfileHeader(user),
+                if (kyc != "not_submitted") _buildProfileHeader(user),
                 const SizedBox(height: 20),
-                _buildKYCStatus(context, user.kycStatus),
+                _buildKYCStatus(context, kyc),
                 const SizedBox(height: 20),
-                _buildProfileInfo(user),
+                _buildProfileInfo(user, kyc),
               ],
             );
           },
@@ -57,22 +56,36 @@ class ProfileScreen extends StatelessWidget {
     VoidCallback? action;
 
     switch (kycStatus) {
-      case "verified":
+      case "approved":
         statusColor = Colors.green;
         statusIcon = Icons.verified;
         statusText = "KYC Verified";
-        action = null;
         break;
+
       case "pending":
         statusColor = Colors.orange;
         statusIcon = Icons.hourglass_empty;
         statusText = "KYC Pending";
-        action = null;
         break;
-      default:
+
+      case "rejected":
         statusColor = Colors.red;
+        statusIcon = Icons.cancel;
+        statusText = "KYC Rejected - Tap to Re-Submit";
+        action = () {
+          PersistentNavBarNavigator.pushNewScreen(
+            context,
+            screen: KycVerificationScreen(),
+            withNavBar: false,
+            pageTransitionAnimation: PageTransitionAnimation.cupertino,
+          );
+        };
+        break;
+
+      default: // "not_submitted" or unknown
+        statusColor = Colors.redAccent;
         statusIcon = Icons.warning;
-        statusText = "Verify KYC";
+        statusText = "KYC Not Submitted - Tap to Start";
         action = () {
           PersistentNavBarNavigator.pushNewScreen(
             context,
@@ -111,7 +124,7 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildProfileInfo(UserProvider user) {
+  Widget _buildProfileInfo(UserProvider user, String kycStatus) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -119,19 +132,16 @@ class ProfileScreen extends StatelessWidget {
         const SizedBox(height: 20),
         _profileField("Email", user.email),
         const SizedBox(height: 20),
-        user.kycStatus == "not_submitted"
-            ? Container()
-            : Container(
-                child: Column(
-                  children: [
-                    _profileField("Date of Birth", user.dob),
-                    const SizedBox(height: 20),
-                    _profileField("Citizenship No", user.citizenidno),
-                    const SizedBox(height: 20),
-                    _buildGovtIDImage(user),
-                  ],
-                ),
-              ),
+        if (kycStatus == "approved")
+          Column(
+            children: [
+              _profileField("Date of Birth", user.dob),
+              const SizedBox(height: 20),
+              _profileField("Citizenship No", user.citizenidno),
+              const SizedBox(height: 20),
+              _buildGovtIDImage(user),
+            ],
+          ),
       ],
     );
   }
@@ -154,9 +164,7 @@ class ProfileScreen extends StatelessWidget {
           ),
           child: Text(
             value.isNotEmpty ? value : "Not Provided",
-            style: const TextStyle(
-              fontSize: 16,
-            ),
+            style: const TextStyle(fontSize: 16),
           ),
         ),
       ],

@@ -7,17 +7,20 @@ class TransactionDetail extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    bool isCredit = transaction['isCredit'];
-    String senderName = transaction['sender']['name'];
-    String receiverName = transaction['receiver']['name'];
-    String status = transaction['status'];
-    String description = transaction['description'];
-    String transactionType = transaction['transactionType'];
-    String createdAt = transaction['createdAt'];
-    String updatedAt = transaction['updatedAt'];
-    int amount = transaction['amount'];
+    // Safe access with null-aware operators
+    bool isCredit = transaction['isCredit'] ?? false;
 
-    // Check if dark mode is enabled
+    String senderName = transaction['sender']?['details']?['name'] ?? 'Unknown';
+    String receiverName =
+        transaction['receiver']?['details']?['name'] ?? 'Unknown';
+
+    String status = transaction['status'] ?? 'N/A';
+    String description = transaction['description'] ?? 'N/A';
+    String transactionType = transaction['transactionType'] ?? 'N/A';
+    String createdAt = transaction['createdAt'] ?? 'N/A';
+    String updatedAt = transaction['updatedAt'] ?? 'N/A';
+    int amount = transaction['amount'] ?? 0;
+
     final isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
@@ -98,7 +101,7 @@ class TransactionDetail extends StatelessWidget {
         children: [
           Text(
             title,
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w600,
             ),
